@@ -30,7 +30,9 @@ pub struct HidInfo {
     pub pid: u16,
     /// Vendor ID
     pub vid: u16,
-    /// A string describing the device provided by the device
+    /// A string describing the device manufacturer
+    pub manufacturer_string: String,
+    /// A string describing the device
     pub product_string: String,
     /// A generic information string build by this crate
     pub info: String,
@@ -123,6 +125,7 @@ pub fn get_hid_devices(usage_page: Option<u16>) -> Vec<HidInfo> {
             res.push(HidInfo {
                 pid: dev.product_id(),
                 vid: dev.vendor_id(),
+                manufacturer_string: dev.manufacturer_string().unwrap_or_default().to_string(),
                 product_string: dev.product_string().unwrap_or_default().to_string(),
                 info: memo.build().to_string(),
                 param,
