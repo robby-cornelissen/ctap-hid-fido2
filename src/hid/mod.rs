@@ -34,6 +34,8 @@ pub struct HidInfo {
     pub manufacturer_string: String,
     /// A string describing the device
     pub product_string: String,
+    /// The path to the device
+    pub path: String,
     /// A generic information string build by this crate
     pub info: String,
     /// An parameter structure to be used to open this device
@@ -127,6 +129,7 @@ pub fn get_hid_devices(usage_page: Option<u16>) -> Vec<HidInfo> {
                 vid: dev.vendor_id(),
                 manufacturer_string: dev.manufacturer_string().unwrap_or_default().to_string(),
                 product_string: dev.product_string().unwrap_or_default().to_string(),
+                path: String::from_utf8_lossy(dev.path().to_bytes()).to_string(),
                 info: memo.build().to_string(),
                 param,
             });
