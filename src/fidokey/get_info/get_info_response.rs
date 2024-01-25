@@ -38,30 +38,8 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x0A => {
                     if let Value::Array(xs) = val {
                         for x in xs {
-                            if let Value::Map(n) = x {
-                                for (key, val) in n {
-                                    let setkey = {
-                                        if let Value::Text(keystr) = key {
-                                            keystr.to_string()
-                                        } else {
-                                            "".to_string()
-                                        }
-                                    };
-
-                                    let setval = {
-                                        if let Value::Text(valstr) = val {
-                                            valstr.to_string()
-                                        } else if let Value::Integer(valint) = val {
-                                            valint.to_string()
-                                        } else {
-                                            "".to_string()
-                                        }
-                                    };
-
-                                    info.algorithms.push((setkey, setval));
-                                }
-
-                                info.algs.push(PublicKeyCredentialParameters {
+                            if let Value::Map(_n) = x {
+                                info.algorithms.push(PublicKeyCredentialParameters {
                                     ctype: util::cbor_get_string_from_map(x, "type")?,
                                     alg: util::cbor_get_num_from_map(x, "alg")?
                                 });
