@@ -23,7 +23,7 @@ impl fmt::Display for PublicKeyCredentialDescriptor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "(id : {} , type : {})",
+            "(id: {} , type: {})",
             util::to_hex_str(&self.id),
             self.ctype
         )

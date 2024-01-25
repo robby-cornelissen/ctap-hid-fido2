@@ -53,6 +53,24 @@ pub(crate) fn cbor_get_string_from_map(cbor_map: &Value, get_key: &str) -> Resul
     }
 }
 
+pub(crate) fn cbor_get_num_from_map<T: NumCast>(cbor_map: &Value, get_key: &str) -> Result<T> {
+    if let Value::Map(xs) = cbor_map {
+        for (key, val) in xs {
+            if let Value::Text(s) = key {
+                if s == get_key {
+                    if let Value::Integer(x) = val {
+                        return Ok(NumCast::from(*x).ok_or(anyhow!("err"))?)
+                    }
+                }
+            }
+        }
+
+        Ok(num::cast(0).unwrap())
+    } else {
+        Err(anyhow!("Cast Error : Value is not a Map."))
+    }
+}
+
 pub(crate) fn cbor_get_bytes_from_map(cbor_map: &Value, get_key: &str) -> Result<Vec<u8>> {
     if let Value::Map(xs) = cbor_map {
         for (key, val) in xs {

@@ -19,6 +19,7 @@ mod hmac_ext;
 mod pintoken;
 pub mod public_key;
 pub mod public_key_credential_descriptor;
+pub mod public_key_credential_parameters;
 pub mod public_key_credential_rp_entity;
 pub mod public_key_credential_user_entity;
 pub mod str_buf;

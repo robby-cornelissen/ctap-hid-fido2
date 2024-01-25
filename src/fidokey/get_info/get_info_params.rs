@@ -1,4 +1,5 @@
 use crate::str_buf::StrBuf;
+use crate::public_key_credential_parameters::PublicKeyCredentialParameters;
 use std::fmt;
 
 #[derive(Debug, Default)]
@@ -16,6 +17,7 @@ pub struct Info {
     pub max_credential_id_length: u32,
     pub transports: Vec<String>,
     pub algorithms: Vec<(String, String)>,
+    pub algs: Vec<PublicKeyCredentialParameters>,
     pub max_serialized_large_blob_array: u32,
     pub force_pin_change: bool,
     pub min_pin_length: u32,
@@ -47,6 +49,7 @@ impl fmt::Display for Info {
             .append("- max_credential_id_length", &self.max_credential_id_length)
             .append("- transports", &format!("{:?}", self.transports))
             .append("- algorithms", &format!("{:?}", self.algorithms))
+            .append("- algs", &format!("{:?}", self.algs))
             .append(
                 "- max_serialized_large_blob_array",
                 &format!("{:?}", self.max_serialized_large_blob_array),

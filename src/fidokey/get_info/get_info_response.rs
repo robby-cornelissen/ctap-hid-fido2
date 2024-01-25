@@ -1,5 +1,6 @@
 use super::get_info_params;
 use crate::util;
+use crate::public_key_credential_parameters::PublicKeyCredentialParameters;
 use anyhow::Result;
 use serde_cbor::Value;
 
@@ -59,10 +60,15 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
 
                                     info.algorithms.push((setkey, setval));
                                 }
+
+                                info.algs.push(PublicKeyCredentialParameters {
+                                    ctype: util::cbor_get_string_from_map(x, "type")?,
+                                    alg: util::cbor_get_num_from_map(x, "alg")?
+                                });
                             }
                         }
                     }
-                }
+                },
                 0x0B => info.max_serialized_large_blob_array = util::cbor_value_to_num(val)?,
                 0x0C => info.force_pin_change = util::cbor_value_to_bool(val)?,
                 0x0D => info.min_pin_length = util::cbor_value_to_num(val)?,
