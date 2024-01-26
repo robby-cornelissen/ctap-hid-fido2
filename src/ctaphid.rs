@@ -60,7 +60,7 @@ pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
     Ok([buf[15], buf[16], buf[17], buf[18]])
 }
 
-fn get_responce_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
+fn get_response_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
     // cid
     //println!("- cid: {:?}", &packet[0..4]);
     // cmd
@@ -87,7 +87,7 @@ fn get_responce_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
     Ok((command, payload_size, response_status))
 }
 
-fn is_responce_error(status: (u8, u16, u8)) -> bool {
+fn is_response_error(status: (u8, u16, u8)) -> bool {
     if status.0 == CTAPHID_MSG {
         status.2 != 0x90
     } else {
@@ -124,11 +124,11 @@ fn get_data(status: (u8, u16, u8), payload: Vec<u8>) -> Vec<u8> {
     data
 }
 
-fn ctaphid_cbor_responce_get_payload_1(packet: &[u8]) -> Vec<u8> {
+fn ctaphid_cbor_response_get_payload_1(packet: &[u8]) -> Vec<u8> {
     packet[7..64].to_vec()
 }
 
-fn ctaphid_cbor_responce_get_payload_2(packet: &[u8]) -> Vec<u8> {
+fn ctaphid_cbor_response_get_payload_2(packet: &[u8]) -> Vec<u8> {
     packet[5..64].to_vec()
 }
 
@@ -290,7 +290,7 @@ fn ctaphid_cbormsg(
             return Ok(buf);
         }
 
-        st = get_responce_status(&buf)?;
+        st = get_response_status(&buf)?;
         if st.0 == CTAPHID_CBOR || st.0 == CTAPHID_MSG {
             packet_1st = buf;
             break;
@@ -314,13 +314,13 @@ fn ctaphid_cbormsg(
     //println!("payload_size = {:?} byte", payload_size);
     //println!("response_status = 0x{:02X}", st.2);
 
-    if is_responce_error(st) {
+    if is_response_error(st) {
         Err(anyhow!(format!(
             "response_status err = {}",
             get_status_message(st)
         )))
     } else {
-        let mut payload = ctaphid_cbor_responce_get_payload_1(&packet_1st);
+        let mut payload = ctaphid_cbor_response_get_payload_1(&packet_1st);
 
         // Is Exists Next Packet?
         let payload_size = st.1;
@@ -336,7 +336,7 @@ fn ctaphid_cbormsg(
                 };
                 //println!("Read: {:?} byte", &buf[..res]);
 
-                let mut p2 = ctaphid_cbor_responce_get_payload_2(&buf);
+                let mut p2 = ctaphid_cbor_response_get_payload_2(&buf);
 
                 // payloadに連結
                 payload.append(&mut p2);
