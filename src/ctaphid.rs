@@ -75,6 +75,7 @@ fn get_response_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
     let response_status = if command == CTAPHID_MSG {
         // length check ()
         if payload_size > packet.len() as u16 {
+            // Consider reformatting this...
             return Err(anyhow!("u2f response size error?"));
         }
         // U2F(last byte of data)
@@ -280,6 +281,9 @@ fn ctaphid_cbormsg(
         let buf = match device.read() {
             Ok(res) => res,
             Err(_error) => {
+                // Is this just a randomly chosen error message? Sure looks like it...
+                // Consider reformatting this...
+                // Maybe call this and HID error? And the other ones CTAP errors?
                 let msg = format!("read err = {}", ctapdef::get_ctap_status_message(0xfe));
                 return Err(anyhow!(msg));
             }
@@ -315,6 +319,7 @@ fn ctaphid_cbormsg(
     //println!("response_status = 0x{:02X}", st.2);
 
     if is_response_error(st) {
+        // Consider reformatting this
         Err(anyhow!(format!(
             "response_status err = {}",
             get_status_message(st)
@@ -330,6 +335,9 @@ fn ctaphid_cbormsg(
                 let buf = match device.read() {
                     Ok(res) => res,
                     Err(_error) => {
+                        // Is this just a randomly chosen error message? Sure looks like it...
+                        // Consider reformatting this...
+                        // Maybe call this and HID error? And the other ones CTAP errors?
                         let msg = format!("read err = {}", ctapdef::get_ctap_status_message(0xfe));
                         return Err(anyhow!(msg));
                     }

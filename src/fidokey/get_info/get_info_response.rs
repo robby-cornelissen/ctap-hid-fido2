@@ -14,6 +14,7 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x02 => info.extensions = util::cbor_value_to_vec_string(val)?,
                 0x03 => info.aaguid = util::cbor_value_to_vec_u8(val)?,
                 0x04 => {
+                    // Options dictionary
                     if let Value::Map(xs) = val {
                         for (key, val) in xs {
                             if let Value::Text(s) = key {

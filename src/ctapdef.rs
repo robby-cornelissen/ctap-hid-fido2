@@ -93,7 +93,7 @@ pub(crate) fn get_ctap_status_message(status: u8) -> String {
         0xF1..=0xFE => "0xF0 CTAP2_ERR_VENDOR Vendor specific error.".to_string(),
         0xFF => "0xFF CTAP2_ERR_VENDOR_LAST Vendor specific error.".to_string(),
         // CTAP仕様にない、謎のステータス
-        0x6A => "0x6A BioPass UnKnown Error.".to_string(),
+        0x6A => "0x6A BioPass unknown error.".to_string(),
         _ => format!("0x{:X}", status),
     }
 }

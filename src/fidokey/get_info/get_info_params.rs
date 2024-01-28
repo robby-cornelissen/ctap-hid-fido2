@@ -9,7 +9,7 @@ pub struct Info {
     pub extensions: Vec<String>,
     pub aaguid: Vec<u8>,
     pub options: Vec<(String, bool)>,
-    pub max_msg_size: i32,
+    pub max_msg_size: u32,
     //pub pin_protocols: Vec<i32>,
     // CTAP 2.1
     pub pin_uv_auth_protocols: Vec<u32>,
