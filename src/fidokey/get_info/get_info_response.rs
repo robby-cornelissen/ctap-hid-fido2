@@ -58,13 +58,10 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x12 => info.uv_modality = util::cbor_value_to_num(val)?,
                 0x14 => info.remaining_discoverable_credentials = util::cbor_value_to_num(val)?,
                 0x15 => {
-                    println!("start");
                     if let Value::Array(xs) = val {
                         for x in xs {
                             match util::cbor_value_to_num(x) {
-                                Ok(value) => {
-                                    info.vendor_prototype_config_commands.push(value);
-                                }
+                                Ok(value) => info.vendor_prototype_config_commands.push(value),
                                 Err(e) => eprintln!("{}", e),
                             }
                         }
