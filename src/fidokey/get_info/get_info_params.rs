@@ -26,6 +26,7 @@ pub struct Info {
     pub preferred_platform_uv_attempts: u32,
     pub uv_modality: u32,
     pub remaining_discoverable_credentials: u32,
+    pub vendor_prototype_config_commands: Vec<u32>,
 }
 
 impl fmt::Display for Info {
