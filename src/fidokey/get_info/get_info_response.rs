@@ -60,7 +60,7 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x15 => {
                     if let Value::Array(xs) = val {
                         for x in xs {
-                //             info.vendor_prototype_config_commands.push(util::cbor_value_to_num(x)?);
+                            info.vendor_prototype_config_commands.push(util::cbor_value_to_num(x)?);
                         }
                     }
                 },
