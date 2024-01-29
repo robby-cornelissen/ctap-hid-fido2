@@ -63,7 +63,7 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                             info.vendor_prototype_config_commands.push(util::cbor_value_to_num(x)?);
                         }
                     }
-                }
+                },
                 _ => println!("parse_cbor_member - unknown info {:?}", member),
             }
         }
