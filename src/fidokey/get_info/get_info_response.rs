@@ -61,8 +61,8 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                     if let Value::Array(xs) = val {
                         for x in xs {
                             match util::cbor_value_to_num(x) {
-                                Ok(y) => info.vendor_prototype_config_commands.push(y),
-                                Err(_) => (),
+                                Ok(value) => info.vendor_prototype_config_commands.push(value),
+                                Err(e) => eprintln!("{}", e),
                             }
                         }
                     }
