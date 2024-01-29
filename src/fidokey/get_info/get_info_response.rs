@@ -57,13 +57,13 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x11 => info.preferred_platform_uv_attempts = util::cbor_value_to_num(val)?,
                 0x12 => info.uv_modality = util::cbor_value_to_num(val)?,
                 0x14 => info.remaining_discoverable_credentials = util::cbor_value_to_num(val)?,
-                0x15 => {
-                    if let Value::Array(xs) = val {
-                        for x in xs {
-                            info.vendor_prototype_config_commands.push(util::cbor_value_to_num(x)?);
-                        }
-                    }
-                },
+                // 0x15 => {
+                //     if let Value::Array(xs) = val {
+                //         for x in xs {
+                //             info.vendor_prototype_config_commands.push(util::cbor_value_to_num(x)?);
+                //         }
+                //     }
+                // },
                 _ => println!("parse_cbor_member - unknown info {:?}", member),
             }
         }
