@@ -1,10 +1,10 @@
 use crate::str_buf::StrBuf;
 use anyhow::{anyhow, Result};
+use base64::{engine::general_purpose, Engine as _};
 use num::NumCast;
 use ring::digest;
 use serde_cbor::Value;
 use std::collections::BTreeMap;
-use base64::{Engine as _, engine::general_purpose};
 
 pub fn to_hex_str(bytes: &[u8]) -> String {
     bytes
@@ -49,7 +49,7 @@ pub(crate) fn cbor_get_string_from_map(cbor_map: &Value, get_key: &str) -> Resul
         }
         Ok("".to_string())
     } else {
-        Err(anyhow!("Cast Error : Value is not a Map."))
+        Err(anyhow!("Cast error: value is not a map"))
     }
 }
 
@@ -59,7 +59,7 @@ pub(crate) fn cbor_get_num_from_map<T: NumCast>(cbor_map: &Value, get_key: &str)
             if let Value::Text(s) = key {
                 if s == get_key {
                     if let Value::Integer(x) = val {
-                        return Ok(NumCast::from(*x).ok_or(anyhow!("err"))?)
+                        return Ok(NumCast::from(*x).ok_or(anyhow!("err"))?);
                     }
                 }
             }
@@ -67,7 +67,7 @@ pub(crate) fn cbor_get_num_from_map<T: NumCast>(cbor_map: &Value, get_key: &str)
 
         Ok(num::cast(0).unwrap())
     } else {
-        Err(anyhow!("Cast Error : Value is not a Map."))
+        Err(anyhow!("Cast error: value is not a map"))
     }
 }
 
@@ -86,17 +86,19 @@ pub(crate) fn cbor_get_bytes_from_map(cbor_map: &Value, get_key: &str) -> Result
         }
         Ok(vec![])
     } else {
-        Err(anyhow!("Cast Error : Value is not a Map."))
+        Err(anyhow!("Cast error: value is not a map"))
     }
 }
 
 pub(crate) fn cbor_value_to_num<T: NumCast>(value: &Value) -> Result<T> {
     if let Value::Integer(x) = value {
-        print_typename(x);
-        println!("{}", x);
-        Ok(NumCast::from(*x).ok_or(anyhow!("err"))?)
+        Ok(NumCast::from(*x).ok_or(anyhow!(
+            "Conversion error: cannot convert [{}] to [{}].",
+            x,
+            std::any::type_name::<T>()
+        ))?)
     } else {
-        Err(anyhow!("Cast Error : Value is not a Integer."))
+        Err(anyhow!("Cast error: value is not an integer"))
     }
 }
 
@@ -105,7 +107,7 @@ pub(crate) fn cbor_value_to_vec_u8(value: &Value) -> Result<Vec<u8>> {
     if let Value::Bytes(xs) = value {
         Ok(xs.to_vec())
     } else {
-        Err(anyhow!("Cast Error : Value is not a Bytes."))
+        Err(anyhow!("Cast error: value is not a byte array"))
     }
 }
 
@@ -114,7 +116,7 @@ pub(crate) fn cbor_value_to_str(value: &Value) -> Result<String> {
     if let Value::Text(s) = value {
         Ok(s.to_string())
     } else {
-        Err(anyhow!("Cast Error : Value is not a Text."))
+        Err(anyhow!("Cast error: value is not a string"))
     }
 }
 
@@ -122,7 +124,7 @@ pub(crate) fn cbor_value_to_bool(value: &Value) -> Result<bool> {
     if let Value::Bool(v) = value {
         Ok(*v)
     } else {
-        Err(anyhow!("Cast Error : Value is not a Bool."))
+        Err(anyhow!("Cast error: value is not a boolean"))
     }
 }
 
@@ -137,7 +139,7 @@ pub(crate) fn cbor_value_to_vec_string(value: &Value) -> Result<Vec<String>> {
         }
         Ok(strings)
     } else {
-        Err(anyhow!("Cast Error : Value is not Array."))
+        Err(anyhow!("Cast error: value is not an array"))
     }
 }
 
@@ -151,7 +153,7 @@ pub(crate) fn cbor_value_to_vec_bytes(value: &Value) -> Result<Vec<Vec<u8>>> {
         }
         Ok(bytes)
     } else {
-        Err(anyhow!("Cast Error : Value is not Array."))
+        Err(anyhow!("Cast error: value is not an array"))
     }
 }
 
@@ -164,10 +166,10 @@ pub(crate) fn cbor_bytes_to_map(bytes: &[u8]) -> Result<BTreeMap<Value, Value>> 
             if let Value::Map(n) = cbor {
                 Ok(n)
             } else {
-                Err(anyhow!("parse error 2"))
+                Err(anyhow!("Conversion error: cannot convert bytes to map"))
             }
         }
-        Err(_) => Err(anyhow!("parse error 1")),
+        Err(_) => Err(anyhow!("Deserialization error: cannot deserialize bytes")),
     }
 }
 
@@ -179,7 +181,7 @@ pub(crate) fn cbor_value_print(value: &Value) {
         Value::Integer(s) => print_typename(s),
         Value::Map(s) => print_typename(s),
         Value::Array(s) => print_typename(s),
-        _ => println!("unknown Value type"),
+        _ => println!("Unknown value type"),
     };
 }
 
