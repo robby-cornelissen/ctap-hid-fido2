@@ -1,6 +1,6 @@
 use super::get_info_params;
-use crate::util;
 use crate::public_key_credential_parameters::PublicKeyCredentialParameters;
+use crate::util;
 use anyhow::Result;
 use serde_cbor::Value;
 
@@ -42,12 +42,12 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                             if let Value::Map(_n) = x {
                                 info.algorithms.push(PublicKeyCredentialParameters {
                                     ctype: util::cbor_get_string_from_map(x, "type")?,
-                                    alg: util::cbor_get_num_from_map(x, "alg")?
+                                    alg: util::cbor_get_num_from_map(x, "alg")?,
                                 });
                             }
                         }
                     }
-                },
+                }
                 0x0B => info.max_serialized_large_blob_array = util::cbor_value_to_num(val)?,
                 0x0C => info.force_pin_change = util::cbor_value_to_bool(val)?,
                 0x0D => info.min_pin_length = util::cbor_value_to_num(val)?,
@@ -58,17 +58,22 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x12 => info.uv_modality = util::cbor_value_to_num(val)?,
                 0x14 => info.remaining_discoverable_credentials = util::cbor_value_to_num(val)?,
                 0x15 => {
+                    println!("start");
                     if let Value::Array(xs) = val {
                         for x in xs {
-                            // Authentrend's ATKey.Pro seems to be sending overly large numbers here
                             match util::cbor_value_to_num(x) {
-                                Ok(value) => info.vendor_prototype_config_commands.push(value),
+                                Ok(value) => {
+                                    info.vendor_prototype_config_commands.push(value);
+                                }
                                 Err(e) => eprintln!("{}", e),
                             }
                         }
                     }
-                },
-                _ => println!("Unknown member found in authenticator info CBOR map: [{:?}]", member),
+                }
+                _ => println!(
+                    "Unknown member found in authenticator info CBOR map: [{:?}]",
+                    member
+                ),
             }
         }
     }
