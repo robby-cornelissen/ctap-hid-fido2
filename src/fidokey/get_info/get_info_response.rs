@@ -60,6 +60,7 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x15 => {
                     if let Value::Array(xs) = val {
                         for x in xs {
+                            // Authentrend's ATKey.Pro seems to be sending overly large numbers here
                             match util::cbor_value_to_num(x) {
                                 Ok(value) => info.vendor_prototype_config_commands.push(value),
                                 Err(e) => eprintln!("{}", e),
@@ -67,7 +68,7 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                         }
                     }
                 },
-                _ => println!("parse_cbor_member - unknown info {:?}", member),
+                _ => println!("Unknown member found in authenticator info CBOR map: [{:?}]", member),
             }
         }
     }

@@ -58,14 +58,12 @@ pub(crate) fn cbor_get_num_from_map<T: NumCast>(cbor_map: &Value, get_key: &str)
         for (key, val) in xs {
             if let Value::Text(s) = key {
                 if s == get_key {
-                    if let Value::Integer(x) = val {
-                        return Ok(NumCast::from(*x).ok_or(anyhow!("err"))?);
-                    }
+                    return cbor_value_to_num(val)
                 }
             }
         }
 
-        Ok(num::cast(0).unwrap())
+        Err(anyhow!("Lookup error: no number value found for key [{}]", get_key))
     } else {
         Err(anyhow!("Cast error: value is not a map"))
     }
