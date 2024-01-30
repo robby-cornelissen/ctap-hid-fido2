@@ -23,10 +23,10 @@ impl fmt::Display for CoseKey {
             strbuf.append("- crv", &intval);
         }
         if let Some(Value::Bytes(bytes)) = self.parameters.get(&-2) {
-            strbuf.appenh("- x", bytes);
+            strbuf.append_hex("- x", bytes);
         }
         if let Some(Value::Bytes(bytes)) = self.parameters.get(&-3) {
-            strbuf.appenh("- y", bytes);
+            strbuf.append_hex("- y", bytes);
         }
         write!(f, "{}", strbuf.build())
     }

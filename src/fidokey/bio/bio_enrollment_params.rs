@@ -18,32 +18,32 @@ pub struct BioSensorInfo {
 impl fmt::Display for BioSensorInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(0);
-        strbuf.addln("- Modality");
-        strbuf.addln(&format!("  - {:?}", self.modality));
+        strbuf.add_line("- Modality");
+        strbuf.add_line(&format!("  - {:?}", self.modality));
 
-        strbuf.addln("- Fingerprint kind");
+        strbuf.add_line("- Fingerprint kind");
         match self.fingerprint_kind {
             FingerprintKind::TouchType => {
-                strbuf.addln("  - touch type fingerprints");
+                strbuf.add_line("  - touch type fingerprints");
             }
             FingerprintKind::SwipeType => {
-                strbuf.addln("  - swipe type fingerprints");
+                strbuf.add_line("  - swipe type fingerprints");
             }
             _ => {
-                strbuf.addln("  - unknown");
+                strbuf.add_line("  - unknown");
             }
         }
 
-        strbuf.addln("- Maximum good samples required for enrollment");
-        strbuf.addln(&format!(
+        strbuf.add_line("- Maximum good samples required for enrollment");
+        strbuf.add_line(&format!(
             "  - {:?}",
             self.max_capture_samples_required_for_enroll
         ));
 
-        strbuf.addln(
+        strbuf.add_line(
             "- Maximum number of bytes the authenticator will accept as a templateFriendlyName",
         );
-        strbuf.addln(&format!("  - {:?}", self.max_template_friendly_name));
+        strbuf.add_line(&format!("  - {:?}", self.max_template_friendly_name));
 
         write!(f, "{}", strbuf.build())
     }
@@ -108,7 +108,7 @@ impl fmt::Display for BioEnrollmentData {
                 "- max_capture_samples_required_for_enroll",
                 &self.max_capture_samples_required_for_enroll,
             )
-            .appenh("- template_id", &self.template_id)
+            .append_hex("- template_id", &self.template_id)
             .append(
                 "- last_enroll_sample_status",
                 &self.last_enroll_sample_status,

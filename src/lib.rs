@@ -133,7 +133,7 @@ mod tests {
 
         let message = "this is message.";
         let sig = encrypt::enc_hmac_sha_256::authenticate(&key, message.as_bytes());
-        print!("{}", StrBuf::bufh("- hmac signature", &sig));
+        print!("{}", StrBuf::create_hex("- hmac signature", &sig));
         assert_eq!(
             sig,
             util::to_str_hex("BF3D3FCFC4462CDCBEBBBC8AF82EA38B7B5ED4259B2061322C57B5CA696D6080")
@@ -148,7 +148,7 @@ mod tests {
 
         let message = "this is message.";
         let enc_data = encrypt::enc_aes256_cbc::encrypt_message_str(&key, message);
-        print!("{}", StrBuf::bufh("- enc_data", &enc_data));
+        print!("{}", StrBuf::create_hex("- enc_data", &enc_data));
         assert_eq!(
             enc_data,
             util::to_str_hex("37455A8392187439EFAA249617AAB5C2")

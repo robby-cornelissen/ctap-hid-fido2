@@ -63,7 +63,7 @@ fn discoverable_credentials(device: &FidoKeyHid, rpid: &str, pin: &str) -> Resul
         "{}",
         strbuf
             .append("- rpid", &rpid)
-            .appenh("- challenge", &challenge)
+            .append_hex("- challenge", &challenge)
             .append("- user_entity", &user_entity)
             .build()
     );
@@ -135,7 +135,7 @@ fn with_cred_blob_ex(device: &FidoKeyHid, rpid: &str, pin: &str) -> Result<()> {
         "{}",
         strbuf
             .append("- rpid", &rpid)
-            .appenh("- challenge", &challenge)
+            .append_hex("- challenge", &challenge)
             .append("- user_entity", &user_entity)
             .build()
     );
@@ -248,7 +248,7 @@ fn legacy_discoverable_credentials(device: &FidoKeyHid, rpid: &str, pin: &str) -
         "{}",
         strbuf
             .append("- rpid", &rpid)
-            .appenh("- challenge", &challenge)
+            .append_hex("- challenge", &challenge)
             .append("- user_entity", &user_entity)
             .build()
     );

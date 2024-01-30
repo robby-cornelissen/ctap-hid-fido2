@@ -26,18 +26,18 @@ impl fmt::Display for Assertion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(42);
         strbuf
-            .appenh("- rpid_hash", &self.rpid_hash)
+            .append_hex("- rpid_hash", &self.rpid_hash)
             .append("- sign_count", &self.sign_count)
             .add(&format!("{}", &self.flags))
             .append("- number_of_credentials", &self.number_of_credentials)
-            .appenh("- signature", &self.signature)
+            .append_hex("- signature", &self.signature)
             .append("- user", &self.user)
-            .appenh("- credential_id", &self.credential_id);
+            .append_hex("- credential_id", &self.credential_id);
 
         for e in &self.extensions {
             if let Extension::HmacSecret(Some(output1_enc)) = e {
                 let tmp = format!("- {}", Extension::HmacSecret(None));
-                strbuf.appenh(&tmp, output1_enc.as_ref());
+                strbuf.append_hex(&tmp, output1_enc.as_ref());
             }
         }
 

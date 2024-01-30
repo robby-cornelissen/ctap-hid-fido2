@@ -23,6 +23,7 @@ fn test_wink() {
 fn test_get_info() {
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
     device.get_info().unwrap();
+    // println!("{}", device.get_info().unwrap());
     assert!(true);
 }
 

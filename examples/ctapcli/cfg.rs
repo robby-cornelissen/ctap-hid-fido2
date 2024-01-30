@@ -40,12 +40,17 @@ pub fn config(device: &FidoKeyHid, command: Command, pin: Option<String>) -> Res
             }
         }
         Command::SetMinPINLength(new_min_pin_length) => {
+            // Needs investigation - suspect not all relevant options are being checked here
             println!("Authenticator Config: Setting a minimum PIN Length.");
             println!("https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#sctn-feature-descriptions-minPinLength");
             println!();
             let info = device.get_info()?;
             let input = common::get_input_with_message(
-                &format!("[WARNING] Cannot be restored\nChange minimum PIN Length from [{}] to [{}] ?. (Yes/No)",info.min_pin_length,new_min_pin_length)
+                &format!(
+                    "[WARNING] Cannot be restored\nChange minimum PIN Length from [{}] to [{}] ?. (Yes/No)",
+                    info.min_pin_length.unwrap_or(0),
+                    new_min_pin_length
+                )
             );
             if input == "Yes" {
                 device.set_min_pin_length(new_min_pin_length, Some(&pin))?;
@@ -74,7 +79,9 @@ pub fn config(device: &FidoKeyHid, command: Command, pin: Option<String>) -> Res
             println!("Force Change PIN: PIN change is required after this command.\nThe authenticator returns CTAP2_ERR_PIN_POLICY_VIOLATION until changePIN is successful.");
             println!("https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#sctn-feature-descriptions-minPinLength");
             println!();
-            let input = common::get_input_with_message("[WARNING] Cannot be restored\nForce Change PIN ?. (Yes/No)");
+            let input = common::get_input_with_message(
+                "[WARNING] Cannot be restored\nForce Change PIN ?. (Yes/No)",
+            );
 
             if input == "Yes" {
                 device.force_change_pin(Some(&pin))?;

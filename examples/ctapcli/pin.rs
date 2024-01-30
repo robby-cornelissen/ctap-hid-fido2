@@ -47,7 +47,7 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
         }
         PinCommand::View => {
             let info = device.get_info()?;
-            if info.force_pin_change {
+            if info.force_pin_change.is_some() && info.force_pin_change.unwrap() {
                 println!("[Force Change PIN is True]\n Please change your PIN.\n");
             }
 

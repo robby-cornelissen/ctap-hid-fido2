@@ -10,8 +10,8 @@ pub struct LargeBlobData {
 impl fmt::Display for LargeBlobData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(33);
-        strbuf.appenh("- large_blob_array", &self.large_blob_array);
-        strbuf.appenh("- rpid_hash", &self.hash);
+        strbuf.append_hex("- large_blob_array", &self.large_blob_array);
+        strbuf.append_hex("- rpid_hash", &self.hash);
         write!(f, "{}", strbuf.build())
     }
 }

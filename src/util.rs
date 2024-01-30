@@ -26,7 +26,7 @@ pub fn print_typename<T>(_: T) {
 
 #[allow(dead_code)]
 pub(crate) fn debugp(title: &str, bytes: &[u8]) {
-    println!("{}", StrBuf::bufh(title, bytes));
+    println!("{}", StrBuf::create_hex(title, bytes));
 }
 
 // for cbor

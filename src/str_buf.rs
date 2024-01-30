@@ -14,25 +14,25 @@ impl StrBuf {
         }
     }
 
-    // add str and return StrBuf
+    // Add str and return StrBuf
     pub fn add(&mut self, val: &str) -> &mut Self {
         self.buf = self.buf.to_string() + val;
         self
     }
 
-    // add str + ¥n and return StrBuf
-    pub fn addln(&mut self, val: &str) -> &mut Self {
+    // Add str + \n and return StrBuf
+    pub fn add_line(&mut self, val: &str) -> &mut Self {
         self.buf = format!("{}{}\n", self.buf, val);
         self
     }
 
-    // create String from title and bytes
-    pub fn bufh(title: &str, bytes: &[u8]) -> String {
+    // Create String from title and bytes
+    pub fn create_hex(title: &str, bytes: &[u8]) -> String {
         let mut strbuf = StrBuf::new(0);
-        strbuf.appenh(title, bytes).build().to_string()
+        strbuf.append_hex(title, bytes).build().to_string()
     }
 
-    pub fn appent(&mut self, title: &str) -> &mut Self {
+    pub fn append_title(&mut self, title: &str) -> &mut Self {
         let tmp = format!("{}\n", title);
         self.buf = self.buf.to_string() + &tmp;
         self
@@ -43,7 +43,15 @@ impl StrBuf {
         self.buf = self.buf.to_string() + &tmp;
         self
     }
-    pub fn appenh(&mut self, title: &str, bytes: &[u8]) -> &mut Self {
+
+    pub fn append_option<T: Display>(&mut self, title: &str, val: &Option<T>) -> &mut Self {
+        if val.as_ref().is_some() {
+            self.append(title, val.as_ref().unwrap());
+        }
+        self
+    }
+
+    pub fn append_hex(&mut self, title: &str, bytes: &[u8]) -> &mut Self {
         let title2 = format!("{}({:02})", title, bytes.len());
         let tmp = format!(
             "{} = {}\n",

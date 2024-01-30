@@ -33,7 +33,7 @@ impl fmt::Display for Attestation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(42);
         strbuf
-            .appenh("- rpid_hash", &self.rpid_hash)
+            .append_hex("- rpid_hash", &self.rpid_hash)
             .append(
                 "- flags_user_present_result",
                 &self.flags_user_present_result,
@@ -47,11 +47,11 @@ impl fmt::Display for Attestation {
                 &self.flags_extension_data_included,
             )
             .append("- sign_count", &self.sign_count)
-            .appenh("- aaguid", &self.aaguid)
+            .append_hex("- aaguid", &self.aaguid)
             .append("- credential_descriptor", &self.credential_descriptor)
             .append("- credential_publickey", &self.credential_publickey)
             .append("- attstmt_alg", &self.attstmt_alg)
-            .appenh("- attstmt_sig", &self.attstmt_sig)
+            .append_hex("- attstmt_sig", &self.attstmt_sig)
             .append("- attstmt_x5c_num", &self.attstmt_x5c.len());
 
         for ex in &self.extensions {

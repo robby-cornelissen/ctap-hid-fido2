@@ -70,25 +70,25 @@ fn create_option_message(
 ) -> Result<String> {
     let mut strbuf = StrBuf::new(0);
     if !title.is_empty() {
-        strbuf.addln(title);
+        strbuf.add_line(title);
     }
 
     match val {
         Some(enable) => {
             if enable {
-                strbuf.addln(support_enable);
+                strbuf.add_line(support_enable);
             } else {
-                strbuf.addln(support_disable);
+                strbuf.add_line(support_disable);
             }
         }
         None => {
-            strbuf.addln(does_not_support);
+            strbuf.add_line(does_not_support);
         }
     };
 
     if !comment.is_empty() {
-        strbuf.addln("");
-        strbuf.addln(comment);
+        strbuf.add_line("");
+        strbuf.add_line(comment);
     }
 
     Ok(strbuf.build().to_string())
@@ -214,55 +214,55 @@ fn param_message(typ: &str, info_param: &InfoParam, val: bool) -> Result<String>
         InfoParam::VersionsU2Fv2 => {
             let mut strbuf = StrBuf::new(0);
             if val {
-                strbuf.addln("This authenticator is supported CTAP1/U2F.");
+                strbuf.add_line("This authenticator is supported CTAP1/U2F.");
             } else {
-                strbuf.addln("This authenticator is not supported CTAP1/U2F.");
+                strbuf.add_line("This authenticator is not supported CTAP1/U2F.");
             }
             strbuf.build().to_string()
         }
         InfoParam::VersionsFido20 => {
             let mut strbuf = StrBuf::new(0);
             if val {
-                strbuf.addln("This is CTAP2.0 / FIDO2 / Web Authentication authenticators.");
+                strbuf.add_line("This is CTAP2.0 / FIDO2 / Web Authentication authenticators.");
             } else {
-                strbuf.addln("This is not CTAP2.0 / FIDO2 / Web Authentication authenticators.");
+                strbuf.add_line("This is not CTAP2.0 / FIDO2 / Web Authentication authenticators.");
             }
             strbuf.build().to_string()
         }
         InfoParam::VersionsFido21Pre => {
             let mut strbuf = StrBuf::new(0);
             if val {
-                strbuf.addln("This authenticator is supported CTAP2.1 Preview features.");
+                strbuf.add_line("This authenticator is supported CTAP2.1 Preview features.");
             } else {
-                strbuf.addln("This authenticator is not supported CTAP2.1 Preview features.");
+                strbuf.add_line("This authenticator is not supported CTAP2.1 Preview features.");
             }
             strbuf.build().to_string()
         }
         InfoParam::VersionsFido21 => {
             let mut strbuf = StrBuf::new(0);
             if val {
-                strbuf.addln(
+                strbuf.add_line(
                     "This is CTAP2.1 / FIDO2(lelvel2) / Web Authentication(level2) authenticators.",
                 );
             } else {
-                strbuf.addln("This is not CTAP2.1 / FIDO2(lelvel2) / Web Authentication(level2) authenticators.");
+                strbuf.add_line("This is not CTAP2.1 / FIDO2(lelvel2) / Web Authentication(level2) authenticators.");
             }
             strbuf.build().to_string()
         }
         InfoParam::ExtensionsHmacSecret => {
             let mut strbuf = StrBuf::new(0);
-            strbuf.addln("hmac(HMAC Secret Extension)");
+            strbuf.add_line("hmac(HMAC Secret Extension)");
 
             if val {
-                strbuf.addln("This authenticator is supported HMAC Secret Extension.");
+                strbuf.add_line("This authenticator is supported HMAC Secret Extension.");
             } else {
-                strbuf.addln("This authenticator is not supported HMAC Secret Extension.");
+                strbuf.add_line("This authenticator is not supported HMAC Secret Extension.");
             }
 
             strbuf
-                .addln("")
-                .addln("HMAC Secret Extension")
-                .addln("https://fidoalliance.org/specs/fido-v2.1-rd-20210309/fido-client-to-authenticator-protocol-v2.1-rd-20210309.html#sctn-hmac-secret-extension");
+                .add_line("")
+                .add_line("HMAC Secret Extension")
+                .add_line("https://fidoalliance.org/specs/fido-v2.1-rd-20210309/fido-client-to-authenticator-protocol-v2.1-rd-20210309.html#sctn-hmac-secret-extension");
 
             strbuf.build().to_string()
         }

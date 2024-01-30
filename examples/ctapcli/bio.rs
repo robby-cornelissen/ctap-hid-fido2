@@ -131,10 +131,10 @@ fn is_supported(device: &FidoKeyHid) -> Result<bool> {
 fn list(device: &FidoKeyHid, pin: &str) -> Result<()> {
     let template_infos = device.bio_enrollment_enumerate_enrollments(pin)?;
     let mut strbuf = StrBuf::new(0);
-    strbuf.addln("");
+    strbuf.add_line("");
     strbuf.append("Number of registrations", &template_infos.len());
     for template_info in template_infos {
-        strbuf.addln(&format!("{}", template_info));
+        strbuf.add_line(&format!("{}", template_info));
     }
     println!("{}", strbuf.build());
 
@@ -173,9 +173,9 @@ fn bio_test(device: &FidoKeyHid, log: bool) -> Result<()> {
         println!(
             "{}",
             strbuf
-                .appent("make_credential()")
+                .append_title("make_credential()")
                 .append("- rpid", &rpid)
-                .appenh("- challenge", &challenge)
+                .append_hex("- challenge", &challenge)
                 .build()
         );
     }
@@ -195,7 +195,7 @@ fn bio_test(device: &FidoKeyHid, log: bool) -> Result<()> {
             "{}",
             strbuf
                 .append("- is_success", &verify_result.is_success)
-                .appenh("- credential_id", &verify_result.credential_id)
+                .append_hex("- credential_id", &verify_result.credential_id)
                 .build()
         );
     }
@@ -215,8 +215,8 @@ fn bio_test(device: &FidoKeyHid, log: bool) -> Result<()> {
         println!(
             "{}",
             strbuf
-                .appent("get_assertion()")
-                .appenh("- challenge", &challenge)
+                .append_title("get_assertion()")
+                .append_hex("- challenge", &challenge)
                 .build()
         );
     }

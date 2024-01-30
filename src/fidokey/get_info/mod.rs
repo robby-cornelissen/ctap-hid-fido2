@@ -97,27 +97,39 @@ impl FidoKeyHid {
 
     pub fn enable_info_param(&self, info_param: &InfoParam) -> Result<bool> {
         let info = self.get_info()?;
+
         let ret = info.versions.iter().find(|v| *v == info_param.as_ref());
         if ret.is_some() {
             return Ok(true);
         }
-        let ret = info.extensions.iter().find(|v| *v == info_param.as_ref());
-        if ret.is_some() {
-            return Ok(true);
+
+        if info.extensions.is_some() {
+            let extensions = info.extensions.unwrap();
+
+            let ret = extensions.iter().find(|v| *v == info_param.as_ref());
+            if ret.is_some() {
+                return Ok(true);
+            }
         }
+
         Ok(false)
     }
 
     pub fn enable_info_option(&self, info_option: &InfoOption) -> Result<Option<bool>> {
         let info = self.get_info()?;
-        let ret = info.options.iter().find(|v| (v).0 == info_option.as_ref());
-        if let Some(v) = ret {
-            // v.1 == true or false
-            // - present and set to true.
-            // - present and set to false.
-            return Ok(Some(v.1));
+
+        if info.options.is_some() {
+            let options = info.options.unwrap();
+
+            let ret = options.iter().find(|v| (v).0 == info_option.as_ref());
+            if let Some(v) = ret {
+                // v.1 == true or false
+                // - present and set to true
+                // - present and set to false
+                return Ok(Some(v.1));
+            }
         }
-        // absent.
+        // absent
         Ok(None)
     }
 }

@@ -71,7 +71,7 @@ impl fmt::Display for Rp {
                 "- public_key_credential_rp_entity",
                 &self.public_key_credential_rp_entity,
             )
-            .appenh("- rpid_hash", &self.rpid_hash);
+            .append_hex("- rpid_hash", &self.rpid_hash);
         write!(f, "{}", strbuf.build())
     }
 }
