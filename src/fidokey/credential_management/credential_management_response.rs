@@ -38,6 +38,7 @@ pub(crate) fn parse_cbor(
                     data.public_key_credential_descriptor = PublicKeyCredentialDescriptor::default()
                         .get_id(val)
                         .get_type(val)
+                        .get_transports(val)
                 }
                 0x08 => data.public_key = PublicKey::new(val),
                 0x09 => data.total_credentials = util::cbor_value_to_num(val)?,

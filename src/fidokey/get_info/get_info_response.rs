@@ -67,19 +67,24 @@ pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {
                 0x10 => info.max_rpids_for_set_min_pin_length = Some(util::cbor_value_to_num(val)?),
                 0x11 => info.preferred_platform_uv_attempts = Some(util::cbor_value_to_num(val)?),
                 0x12 => info.uv_modality = Some(util::cbor_value_to_num(val)?),
-                0x14 => info.remaining_discoverable_credentials = Some(util::cbor_value_to_num(val)?),
+                0x14 => {
+                    info.remaining_discoverable_credentials = Some(util::cbor_value_to_num(val)?)
+                }
                 0x15 => {
+                    // Should probably create a cbor_value_to_num_vec utility function
                     if let Value::Array(xs) = val {
                         let mut vendor_prototype_config_commands = Vec::new();
 
                         for x in xs {
+                            // Or could get rid of this overly careful parsing and do the same as for pin_uv_auth_protocols
                             match util::cbor_value_to_num(x) {
                                 Ok(value) => vendor_prototype_config_commands.push(value),
                                 Err(e) => eprintln!("{}", e),
                             }
                         }
 
-                        info.vendor_prototype_config_commands = Some(vendor_prototype_config_commands);
+                        info.vendor_prototype_config_commands =
+                            Some(vendor_prototype_config_commands);
                     }
                 }
                 _ => println!(

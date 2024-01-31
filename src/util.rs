@@ -82,7 +82,24 @@ pub(crate) fn cbor_get_bytes_from_map(cbor_map: &Value, get_key: &str) -> Result
                 }
             }
         }
+        // Needs to be revisited; consider returning a lookup error
         Ok(vec![])
+    } else {
+        Err(anyhow!("Cast error: value is not a map"))
+    }
+}
+
+pub(crate) fn cbor_get_vec_string_from_map(cbor_map: &Value, get_key: &str) -> Result<Vec<String>> {
+    if let Value::Map(xs) = cbor_map {
+        for (key, val) in xs {
+            if let Value::Text(s) = key {
+                if s == get_key {
+                    return cbor_value_to_vec_string(val);
+                }
+            }
+        }
+
+        Err(anyhow!("Lookup error: no array value found for key [{}]", get_key))
     } else {
         Err(anyhow!("Cast error: value is not a map"))
     }
