@@ -22,7 +22,7 @@ impl FidoKeyHid {
         pin.pin_retries.ok_or(anyhow!("No PIN retries value found in authenticator response"))
     }
 
-    /// Get power cycle state
+    /// Get power cycle state, since CTAP 2.1
     /// This is very inefficient as the same information is obtained from the PIN retries
     /// command, but we don't have a good result object to expose all PIN information
     pub fn get_power_cycle_state(&self) -> Result<Option<bool>> {
@@ -37,8 +37,8 @@ impl FidoKeyHid {
         Ok(pin.power_cycle_state)
     }
 
-    /// Get UV retry count
-    pub fn get_uv_retries(&self) -> Result<u32> {
+    /// Get UV retry count, since CTAP 2.1
+    pub fn get_uv_retries(&self) -> Result<Option<u32>> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let send_payload = client_pin_command::create_payload(PinCmd::GetUVRetries)?;
@@ -47,9 +47,10 @@ impl FidoKeyHid {
 
         let pin = client_pin_response::parse_cbor_client_pin_get_retries(&response_cbor)?;
 
-        pin.uv_retries.ok_or(anyhow!("No UV retries value found in authenticator response"))
+        Ok(pin.uv_retries)
     }
 
+    /// This proliferation of set PIN, set new PIN and change PIN commands is confusing
     /// Set New PIN
     pub fn set_new_pin(&self, pin: &str) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;

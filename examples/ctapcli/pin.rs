@@ -84,23 +84,29 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
                 println!();
             }
 
+            // Unclear where the notion comes from that UV retries can only be retrieved when the bioEnroll option is present
             let bio_enroll = device.enable_info_option(&InfoOption::BioEnroll)?;
             if bio_enroll.is_some() && bio_enroll.unwrap() {
                 println!();
                 println!();
                 println!("Get UV retry counter.\n");
                 match device.get_uv_retries() {
-                    Ok(v) => {
-                        println!("UV retry counter = {}", v);
+                    Ok(uv_retries_option) => {
+                        if uv_retries_option.is_some() {
+                            let uv_retries = uv_retries_option.unwrap();
+                            println!("UV retry counter = {}", uv_retries);
 
-                        if v > 0 {
-                            println!();
-                            println!("UV retries count is the number of built-in UV attempts remaining before built-in UV is disabled on the device.");
-                        } else {
-                            println!("\nUV is blocked. \nAuthenticate with a PIN will unblock it.");
-                            println!();
-                            println!(":_( ");
-                            println!();
+                            if uv_retries > 0 {
+                                println!();
+                                println!("UV retries count is the number of built-in UV attempts remaining before built-in UV is disabled on the device.");
+                            } else {
+                                println!(
+                                    "\nUV is blocked. \nAuthenticate with a PIN will unblock it."
+                                );
+                                println!();
+                                println!(":_( ");
+                                println!();
+                            }
                         }
                     }
                     Err(err) => return Err(err),
