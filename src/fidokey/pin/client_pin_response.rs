@@ -5,8 +5,9 @@ use serde_cbor::Value;
 
 #[derive(Default)]
 pub struct Pin {
-    pub retries: i32,
-    pub uv_retries: i32,
+    pub pin_retries: Option<u32>,
+    pub uv_retries: Option<u32>,
+    pub power_cycle_state: Option<bool>,
 }
 
 pub fn parse_cbor_client_pin_get_pin_token(bytes: &[u8]) -> Result<Vec<u8>> {
@@ -49,8 +50,9 @@ pub fn parse_cbor_client_pin_get_retries(bytes: &[u8]) -> Result<Pin> {
         for (key, val) in &n {
             if let Value::Integer(member) = key {
                 match member {
-                    3 => pin.retries = util::cbor_value_to_num(val)?,
-                    5 => pin.uv_retries = util::cbor_value_to_num(val)?,
+                    0x03 => pin.pin_retries = Some(util::cbor_value_to_num(val)?),
+                    0x04 => pin.power_cycle_state = Some(util::cbor_value_to_bool(val)?),
+                    0x05 => pin.uv_retries = Some(util::cbor_value_to_num(val)?),
                     _ => println!("- anything error"),
                 }
             }
