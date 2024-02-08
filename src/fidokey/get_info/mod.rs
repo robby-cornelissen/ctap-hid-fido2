@@ -133,3 +133,72 @@ impl FidoKeyHid {
         Ok(None)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{Cfg, HidParam};
+
+    use super::*;
+
+    #[test]
+    fn test_check_version_support() {
+        let hid_params = HidParam::get();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+
+        let info = device.get_info().expect("Could not get authenticator info");
+
+        if info.supports_version(InfoParam::VersionsU2Fv2.as_ref().to_string()) {
+            println!("Supports U2F_V2");
+        }
+
+        if info.supports_version(InfoParam::VersionsFido20.as_ref().to_string()) {
+            println!("Supports FIDO2");
+        }
+
+        if info.supports_version(InfoParam::VersionsFido21Pre.as_ref().to_string()) {
+            println!("Supports FIDO2.1_PRE");
+        }
+
+        if info.supports_version(InfoParam::VersionsFido21.as_ref().to_string()) {
+            println!("Supports FIDO2.1");
+        }
+
+        assert!(true)
+    }
+
+    #[test]
+    fn test_check_extension() {
+        let hid_params = HidParam::get();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+
+        let info = device.get_info().expect("Could not get authenticator info");
+
+        if info.has_extension(InfoParam::ExtensionsHmacSecret.as_ref().to_string()) {
+            println!("Has hmac-secret extension");
+        }
+
+        assert!(true)
+    }
+
+    #[test]
+    fn test_get_option() {
+        let hid_params = HidParam::get();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+
+        let info = device.get_info().expect("Could not get authenticator info");
+
+        match info.get_option(InfoOption::ClientPin.as_ref().to_string()) {
+            Some(true) => {
+                println!("Client PIN option present and set")
+            },
+            Some(false) => {
+                println!("Client PIN option present and not set")
+            },
+            None => {
+                println!("Client PIN option absent")
+            }
+        }
+
+        assert!(true)
+    }
+}

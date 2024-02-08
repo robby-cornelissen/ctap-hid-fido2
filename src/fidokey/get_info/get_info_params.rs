@@ -29,6 +29,30 @@ pub struct Info {
     pub vendor_prototype_config_commands: Option<Vec<u64>>,
 }
 
+impl Info {
+    pub fn supports_version(&self, version: String) -> bool {
+        self.versions.contains(&version)
+    }
+
+    pub fn has_extension(&self, extension_id: String) -> bool {
+        if let Some(extensions) = &self.extensions {
+            return extensions.contains(&extension_id)
+        }
+
+        false
+    }
+
+    pub fn get_option(&self, option_id: String) -> Option<bool> {
+        if let Some(options) = &self.options {
+            if let Some((_, option_value)) = options.iter().find(|(id, _)| id == &option_id) {
+                return Some(option_value.clone());
+            }
+        }
+
+        None
+    }
+}
+
 impl fmt::Display for Info {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(36);

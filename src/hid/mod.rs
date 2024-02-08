@@ -85,6 +85,10 @@ impl HidParam {
                 vid: 0x32a3,
                 pid: 0x3201,
             }, // Idem Key
+            HidParam::VidPid {
+                vid: 0x31bb,
+                pid: 0x0622,
+            }, // Authentrend ATKey.Pro
         ]
     }
     pub fn auto() -> Vec<HidParam> {

@@ -17,6 +17,7 @@ pub enum SubCommand {
 }
 
 #[allow(dead_code)]
+// This entire thing needs to be refactored to use bitflags; multiple permissions can be requested
 pub enum Permission {
     MakeCredential = 0x01,
     GetAssertion = 0x02,

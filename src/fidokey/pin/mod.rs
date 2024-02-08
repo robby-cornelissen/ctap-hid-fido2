@@ -1,8 +1,8 @@
 mod client_pin;
 mod client_pin_command;
 mod client_pin_response;
-use super::FidoKeyHid;
-use crate::ctaphid;
+use super::{get_info::InfoParam, FidoKeyHid};
+use crate::{ctaphid, pintoken::PinToken};
 use anyhow::{anyhow, Result};
 use client_pin_command::SubCommand as PinCmd;
 pub use client_pin_command::*;
@@ -19,7 +19,9 @@ impl FidoKeyHid {
 
         let pin = client_pin_response::parse_cbor_client_pin_get_retries(&response_cbor)?;
 
-        pin.pin_retries.ok_or(anyhow!("No PIN retries value found in authenticator response"))
+        pin.pin_retries.ok_or(anyhow!(
+            "No PIN retries value found in authenticator response"
+        ))
     }
 
     /// Get power cycle state, since CTAP 2.1
@@ -63,6 +65,18 @@ impl FidoKeyHid {
         let cid = ctaphid::ctaphid_init(self)?;
         client_pin::change_pin(self, &cid, current_pin, new_pin)?;
         Ok(())
+    }
+
+    // Have yet to find an appropriate command to test a PIN in the spec;
+    // For now, we just try to get any PIN token
+    pub fn get_any_pin_token(&self, pin: &str) -> Result<PinToken> {
+        let cid = ctaphid::ctaphid_init(self)?;
+        let info = self.get_info()?;
+
+        match info.supports_version(InfoParam::VersionsFido21.as_ref().to_string()) {
+            true => self.get_pinuv_auth_token_with_permission(&cid, pin, Permission::MakeCredential),
+            false => self.get_pin_token(&cid, pin)
+        }
     }
 }
 
