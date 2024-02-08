@@ -13,7 +13,7 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
         PinCommand::New => {
             println!("Set new PIN.\n");
 
-            if let Some(client_pin) = device.enable_info_option(&InfoOption::ClientPin)? {
+            if let Some(client_pin) = device.is_info_option_enabled(&InfoOption::ClientPin)? {
                 if client_pin {
                     return Err(anyhow!("PIN is already set."));
                 }
@@ -30,7 +30,7 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
         PinCommand::Change => {
             println!("Change PIN.\n");
 
-            if device.enable_info_option(&InfoOption::ClientPin)?.is_none() {
+            if device.is_info_option_enabled(&InfoOption::ClientPin)?.is_none() {
                 return Err(anyhow!("PIN not yet set."));
             };
 
@@ -85,7 +85,7 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
             }
 
             // Unclear where the notion comes from that UV retries can only be retrieved when the bioEnroll option is present
-            let bio_enroll = device.enable_info_option(&InfoOption::BioEnroll)?;
+            let bio_enroll = device.is_info_option_enabled(&InfoOption::BioEnroll)?;
             if bio_enroll.is_some() && bio_enroll.unwrap() {
                 println!();
                 println!();

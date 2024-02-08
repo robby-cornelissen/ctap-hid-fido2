@@ -114,12 +114,12 @@ fn bio_enrollment_next(device: &FidoKeyHid, enroll_status1: &EnrollStatus1) -> R
 }
 
 fn is_supported(device: &FidoKeyHid) -> Result<bool> {
-    if device.enable_info_option(&InfoOption::BioEnroll)?.is_some() {
+    if device.is_info_option_enabled(&InfoOption::BioEnroll)?.is_some() {
         return Ok(true);
     }
 
     if device
-        .enable_info_option(&InfoOption::UserVerificationMgmtPreview)?
+        .is_info_option_enabled(&InfoOption::UserVerificationMgmtPreview)?
         .is_some()
     {
         Ok(true)

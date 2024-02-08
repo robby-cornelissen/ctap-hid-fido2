@@ -27,7 +27,7 @@ pub fn config(device: &FidoKeyHid, command: Command, pin: Option<String>) -> Res
             println!("Authenticator Config: Toggle Always Require User Verification.");
             println!("https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#sctn-feature-descriptions-alwaysUv");
             println!();
-            let always_uv = device.enable_info_option(&InfoOption::AlwaysUv)?.unwrap();
+            let always_uv = device.is_info_option_enabled(&InfoOption::AlwaysUv)?.unwrap();
             let input = common::get_input_with_message(&format!(
                 "Change Require User Verification from [{}] to [{}]. (Yes/No)",
                 always_uv, !always_uv
@@ -96,7 +96,7 @@ pub fn config(device: &FidoKeyHid, command: Command, pin: Option<String>) -> Res
 }
 
 fn is_supported(device: &FidoKeyHid) -> Result<bool> {
-    if device.enable_info_option(&InfoOption::AuthnrCfg)?.is_some() {
+    if device.is_info_option_enabled(&InfoOption::AuthnrCfg)?.is_some() {
         Ok(true)
     } else {
         Ok(false)

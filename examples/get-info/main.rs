@@ -42,7 +42,7 @@ fn main() {
         }
 
         println!("enable_info_option() - ClinetPin");
-        match dev.enable_info_option(&InfoOption::ClientPin) {
+        match dev.is_info_option_enabled(&InfoOption::ClientPin) {
             Ok(result) => println!("PIN = {:?}", result),
             Err(e) => println!("- error: {:?}", e),
         }

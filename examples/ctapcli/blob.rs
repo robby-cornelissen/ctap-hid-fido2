@@ -50,7 +50,7 @@ pub fn blob(device: &FidoKeyHid, command: Command, pin: Option<String>) -> Resul
 
 fn is_supported(device: &FidoKeyHid) -> Result<bool> {
     if device
-        .enable_info_option(&InfoOption::LargeBlobs)?
+        .is_info_option_enabled(&InfoOption::LargeBlobs)?
         .is_some()
     {
         Ok(true)

@@ -415,7 +415,7 @@ fn main() -> Result<()> {
 }
 
 pub fn up(device: &FidoKeyHid) -> Result<()> {
-    if !device.enable_info_param(&InfoParam::VersionsFido21)? {
+    if !device.is_info_param_enabled(&InfoParam::VersionsFido21)? {
         return Err(anyhow!(
             "This authenticator is not supported for this functions."
         ));

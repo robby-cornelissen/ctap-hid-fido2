@@ -95,7 +95,7 @@ impl FidoKeyHid {
         }
     }
 
-    pub fn enable_info_param(&self, info_param: &InfoParam) -> Result<bool> {
+    pub fn is_info_param_enabled(&self, info_param: &InfoParam) -> Result<bool> {
         let info = self.get_info()?;
 
         let ret = info.versions.iter().find(|v| *v == info_param.as_ref());
@@ -115,7 +115,7 @@ impl FidoKeyHid {
         Ok(false)
     }
 
-    pub fn enable_info_option(&self, info_option: &InfoOption) -> Result<Option<bool>> {
+    pub fn is_info_option_enabled(&self, info_option: &InfoOption) -> Result<Option<bool>> {
         let info = self.get_info()?;
 
         if info.options.is_some() {

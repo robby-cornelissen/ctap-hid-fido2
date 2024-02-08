@@ -33,7 +33,7 @@ pub fn info(device: &FidoKeyHid, item: &str) -> Result<()> {
     };
 
     if let Some(option) = info_option {
-        match device.enable_info_option(&option) {
+        match device.is_info_option_enabled(&option) {
             Ok(result) => println!("{}", option_message(item, &option, result)?),
             Err(err) => return Err(err),
         }
@@ -48,7 +48,7 @@ pub fn info(device: &FidoKeyHid, item: &str) -> Result<()> {
         };
 
         if let Some(param) = info_param {
-            match device.enable_info_param(&param) {
+            match device.is_info_param_enabled(&param) {
                 Ok(result) => println!("{}", param_message(item, &param, result)?),
                 Err(err) => return Err(err),
             }

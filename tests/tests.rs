@@ -30,7 +30,7 @@ fn test_get_info() {
 #[test]
 fn test_get_info_u2f() {
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
-    match device.enable_info_param(&InfoParam::VersionsU2Fv2) {
+    match device.is_info_param_enabled(&InfoParam::VersionsU2Fv2) {
         Ok(result) => {
             if !result {
                 // Skip
@@ -105,7 +105,7 @@ fn test_make_credential_with_pin_non_rk_exclude_authenticator() {
 #[test]
 fn test_credential_management_get_creds_metadata() {
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
-    match device.enable_info_param(&InfoParam::VersionsFido21Pre) {
+    match device.is_info_param_enabled(&InfoParam::VersionsFido21Pre) {
         Ok(result) => {
             if !result {
                 // Skip
@@ -125,7 +125,7 @@ fn test_credential_management_get_creds_metadata() {
 #[test]
 fn test_credential_management_enumerate_rps() {
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
-    match device.enable_info_param(&InfoParam::VersionsFido21Pre) {
+    match device.is_info_param_enabled(&InfoParam::VersionsFido21Pre) {
         Ok(result) => {
             if !result {
                 // Skip
@@ -148,7 +148,7 @@ fn test_bio_enrollment_get_fingerprint_sensor_info() {
 
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
 
-    match device.enable_info_option(&InfoOption::UserVerificationMgmtPreview) {
+    match device.is_info_option_enabled(&InfoOption::UserVerificationMgmtPreview) {
         Ok(result) => {
             //println!("result = {:?}", result);
             if let Some(v) = result {
@@ -178,7 +178,7 @@ fn test_bio_enrollment_enumerate_enrollments() {
 
     let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
 
-    match device.enable_info_option(&InfoOption::UserVerificationMgmtPreview) {
+    match device.is_info_option_enabled(&InfoOption::UserVerificationMgmtPreview) {
         Ok(result) => {
             if let Some(v) = result {
                 if v {

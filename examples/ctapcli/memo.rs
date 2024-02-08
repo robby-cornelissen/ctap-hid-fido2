@@ -122,13 +122,13 @@ fn list_tag(device: &FidoKeyHid, pin: &str, rpid: &str) -> Result<()> {
 
 fn is_supported(device: &FidoKeyHid) -> Result<bool> {
     if device
-        .enable_info_option(&InfoOption::CredentialMgmtPreview)?
+        .is_info_option_enabled(&InfoOption::CredentialMgmtPreview)?
         .is_some()
     {
         return Ok(true);
     }
 
-    if device.enable_info_option(&InfoOption::CredMgmt)?.is_some() {
+    if device.is_info_option_enabled(&InfoOption::CredMgmt)?.is_some() {
         Ok(true)
     } else {
         Ok(false)
