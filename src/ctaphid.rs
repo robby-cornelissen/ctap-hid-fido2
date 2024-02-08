@@ -62,9 +62,9 @@ pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
 
 fn get_response_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
     // cid
-    //println!("- cid: {:?}", &packet[0..4]);
+    // println!("- cid: {:?}", &packet[0..4]);
     // cmd
-    //println!("- cmd: 0x{:2X}", packet[4]);
+    // println!("- cmd: 0x{:2X}", packet[4]);
 
     let command = packet[4];
 
@@ -283,12 +283,12 @@ fn ctaphid_cbormsg(
             Err(_error) => {
                 // Is this just a randomly chosen error message? Sure looks like it...
                 // Consider reformatting this...
-                // Maybe call this and HID error? And the other ones CTAP errors?
+                // Maybe call this an HID error? And the other ones CTAP errors?
                 let msg = format!("read err = {}", ctapdef::get_ctap_status_message(0xfe));
                 return Err(anyhow!(msg));
             }
         };
-        //println!("Read: {:?} byte", res);
+        // println!("Read: {:?} byte", res);
 
         if command != CTAPHID_CBOR && command != CTAPHID_MSG {
             return Ok(buf);
@@ -315,8 +315,7 @@ fn ctaphid_cbormsg(
         }
     }
 
-    //println!("payload_size = {:?} byte", payload_size);
-    //println!("response_status = 0x{:02X}", st.2);
+    // println!("response_status = 0x{:02X}", st.2);
 
     if is_response_error(st) {
         // Consider reformatting this

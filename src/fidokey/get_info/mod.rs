@@ -49,6 +49,7 @@ pub enum InfoOption {
     UvToken,
 }
 
+// This really needs to split up into something like InfoVersion and InfoExtension
 #[derive(Debug, Clone, PartialEq, strum_macros::AsRefStr)]
 pub enum InfoParam {
     #[strum(serialize = "U2F_V2")]

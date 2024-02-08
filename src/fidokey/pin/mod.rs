@@ -74,8 +74,13 @@ impl FidoKeyHid {
         let info = self.get_info()?;
 
         match info.supports_version(InfoParam::VersionsFido21.as_ref().to_string()) {
-            true => self.get_pinuv_auth_token_with_permission(&cid, pin, Permission::MakeCredential),
-            false => self.get_pin_token(&cid, pin)
+            // This permission is very much chosen at random and not at all fool-proof
+            // It might be better to request an undefined permission and get a token with no permissions
+            // See https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#getPinUvAuthTokenUsingPinWithPermissions
+            true => {
+                self.get_pinuv_auth_token_with_permission(&cid, pin, Permission::LargeBlobWrite)
+            }
+            false => self.get_pin_token(&cid, pin),
         }
     }
 }
@@ -102,6 +107,21 @@ mod tests {
             client_pin_response::parse_cbor_client_pin_get_keyagreement(&response_cbor).unwrap();
         println!("authenticatorClientPIN (0x06) - getKeyAgreement");
         println!("{}", key_agreement);
+
+        assert!(true);
+    }
+
+    #[test]
+    fn test_client_pin_get_any_pin_token() {
+        let hid_params = HidParam::get();
+        let mut hid_cfg = Cfg::init();
+        hid_cfg.enable_log = true;
+        let device = FidoKeyHid::new(&hid_params, &hid_cfg).unwrap();
+
+        match device.get_any_pin_token("3471") {
+            Ok(_) => println!("Got PIN token"),
+            Err(e) => println!("{}", e),
+        }
 
         assert!(true);
     }

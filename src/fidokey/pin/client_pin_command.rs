@@ -144,6 +144,7 @@ fn to_payload(map: BTreeMap<Value, Value>) -> Vec<u8> {
 
 // 0x01 : pin_protocol
 fn insert_pin_protocol(map: &mut BTreeMap<Value, Value>) {
+    // No good. Need to get the version when getting the shared secret.
     let pin_prot = Value::Integer(1);
     map.insert(Value::Integer(0x01), pin_prot);
 }
