@@ -1,4 +1,8 @@
-use crate::{ctapdef, fidokey::FidoKeyHid, util};
+use crate::{
+    error::{CtapError, U2fError},
+    fidokey::FidoKeyHid,
+    util,
+};
 use anyhow::{anyhow, Error, Result};
 use std::{thread, time};
 
@@ -93,14 +97,6 @@ fn is_response_error(status: (u8, u16, u8)) -> bool {
         status.2 != 0x90
     } else {
         status.2 != 0x00
-    }
-}
-
-fn get_status_message(status: (u8, u16, u8)) -> String {
-    if status.0 == CTAPHID_MSG {
-        ctapdef::get_u2f_status_message(status.2)
-    } else {
-        ctapdef::get_ctap_status_message(status.2)
     }
 }
 
@@ -282,10 +278,8 @@ fn ctaphid_cbormsg(
             Ok(res) => res,
             Err(_error) => {
                 // Is this just a randomly chosen error message? Sure looks like it...
-                // Consider reformatting this...
                 // Maybe call this an HID error? And the other ones CTAP errors?
-                let msg = format!("read err = {}", ctapdef::get_ctap_status_message(0xfe));
-                return Err(anyhow!(msg));
+                return Err(anyhow!(CtapError::from(0xfe)));
             }
         };
         // println!("Read: {:?} byte", res);
@@ -318,11 +312,11 @@ fn ctaphid_cbormsg(
     // println!("response_status = 0x{:02X}", st.2);
 
     if is_response_error(st) {
-        // Consider reformatting this
-        Err(anyhow!(format!(
-            "response_status err = {}",
-            get_status_message(st)
-        )))
+        if st.0 == CTAPHID_MSG {
+            Err(anyhow!(U2fError::from(st.2)))
+        } else {
+            Err(anyhow!(CtapError::from(st.2)))
+        }
     } else {
         let mut payload = ctaphid_cbor_response_get_payload_1(&packet_1st);
 
@@ -335,10 +329,8 @@ fn ctaphid_cbormsg(
                     Ok(res) => res,
                     Err(_error) => {
                         // Is this just a randomly chosen error message? Sure looks like it...
-                        // Consider reformatting this...
-                        // Maybe call this and HID error? And the other ones CTAP errors?
-                        let msg = format!("read err = {}", ctapdef::get_ctap_status_message(0xfe));
-                        return Err(anyhow!(msg));
+                        // Maybe call this an HID error? And the other ones CTAP errors?
+                        return Err(anyhow!(CtapError::from(0xfe)));
                     }
                 };
                 //println!("Read: {:?} byte", &buf[..res]);

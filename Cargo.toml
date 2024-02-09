@@ -1,14 +1,14 @@
 [package]
 name = "ctap-hid-fido2"
 version = "3.5.0"
-authors = ["gebo <35388172+gebogebogebo@users.noreply.github.com>"]
-edition = "2018"
+authors = ["Robby Cornelissen", "gebo <35388172+gebogebogebo@users.noreply.github.com>"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 license="MIT"
 description="Rust FIDO2 CTAP library"
-repository="https://github.com/gebogebogebo/ctap-hid-fido2"
+repository="https://github.com/robby-cornelissen/ctap-hid-fido2"
 keywords=["FIDO2","CTAP"]
 readme="README.md"
 

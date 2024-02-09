@@ -1,10 +1,3 @@
-/*!
-## Examples
-
-[-> Examples](https://github.com/gebogebogebo/ctap-hid-fido2/blob/master/README.md#examples)
-
-*/
-
 pub mod auth_data;
 mod ctapdef;
 mod ctaphid;
@@ -15,6 +8,7 @@ mod encrypt {
     pub mod p256;
     pub mod shared_secret;
 }
+pub mod error;
 mod hmac_ext;
 mod pintoken;
 pub mod public_key;
