@@ -5,8 +5,8 @@ use crate::encrypt::shared_secret::SharedSecret;
 use crate::fidokey::pin::{
     create_payload, parse_cbor_client_pin_get_keyagreement, SubCommand as PinCmd,
 };
+use crate::result::Result;
 use crate::FidoKeyHid;
-use anyhow::Result;
 
 #[derive(Debug, Default, Clone)]
 pub struct HmacExt {

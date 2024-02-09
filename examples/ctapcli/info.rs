@@ -12,7 +12,7 @@ pub fn info(device: &FidoKeyHid, item: &str) -> Result<()> {
         println!("Get all data.");
         match device.get_info() {
             Ok(info) => println!("{}", info),
-            Err(err) => return Err(err),
+            Err(err) => return Err(err.into()),
         };
     }
 
@@ -35,7 +35,7 @@ pub fn info(device: &FidoKeyHid, item: &str) -> Result<()> {
     if let Some(option) = info_option {
         match device.is_info_option_enabled(&option) {
             Ok(result) => println!("{}", option_message(item, &option, result)?),
-            Err(err) => return Err(err),
+            Err(err) => return Err(err.into()),
         }
     } else {
         let info_param = match item {
@@ -50,7 +50,7 @@ pub fn info(device: &FidoKeyHid, item: &str) -> Result<()> {
         if let Some(param) = info_param {
             match device.is_info_param_enabled(&param) {
                 Ok(result) => println!("{}", param_message(item, &param, result)?),
-                Err(err) => return Err(err),
+                Err(err) => return Err(err.into()),
             }
         } else {
             return Err(anyhow!("Invalid item"));

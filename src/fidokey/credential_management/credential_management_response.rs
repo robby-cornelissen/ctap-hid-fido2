@@ -3,8 +3,8 @@ use crate::public_key::PublicKey;
 use crate::public_key_credential_descriptor::PublicKeyCredentialDescriptor;
 use crate::public_key_credential_rp_entity::PublicKeyCredentialRpEntity;
 use crate::public_key_credential_user_entity::PublicKeyCredentialUserEntity;
+use crate::result::Result;
 use crate::util;
-use anyhow::Result;
 use serde_cbor::Value;
 
 pub(crate) fn parse_cbor(

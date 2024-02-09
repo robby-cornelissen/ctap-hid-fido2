@@ -1,5 +1,5 @@
 use crate::str_buf::StrBuf;
-use anyhow::{anyhow, Result};
+use crate::result::Result;
 use base64::{engine::general_purpose, Engine as _};
 use num::NumCast;
 use ring::digest;
@@ -49,7 +49,7 @@ pub(crate) fn cbor_get_string_from_map(cbor_map: &Value, get_key: &str) -> Resul
         }
         Ok("".to_string())
     } else {
-        Err(anyhow!("Cast error: value is not a map"))
+        Err(anyhow::anyhow!("Cast error: value is not a map").into())
     }
 }
 
@@ -63,9 +63,9 @@ pub(crate) fn cbor_get_num_from_map<T: NumCast>(cbor_map: &Value, get_key: &str)
             }
         }
 
-        Err(anyhow!("Lookup error: no number value found for key [{}]", get_key))
+        Err(anyhow::anyhow!("Lookup error: no number value found for key [{}]", get_key).into())
     } else {
-        Err(anyhow!("Cast error: value is not a map"))
+        Err(anyhow::anyhow!("Cast error: value is not a map").into())
     }
 }
 
@@ -85,7 +85,7 @@ pub(crate) fn cbor_get_bytes_from_map(cbor_map: &Value, get_key: &str) -> Result
         // Needs to be revisited; consider returning a lookup error
         Ok(vec![])
     } else {
-        Err(anyhow!("Cast error: value is not a map"))
+        Err(anyhow::anyhow!("Cast error: value is not a map").into())
     }
 }
 
@@ -99,21 +99,21 @@ pub(crate) fn cbor_get_vec_string_from_map(cbor_map: &Value, get_key: &str) -> R
             }
         }
 
-        Err(anyhow!("Lookup error: no array value found for key [{}]", get_key))
+        Err(anyhow::anyhow!("Lookup error: no array value found for key [{}]", get_key).into())
     } else {
-        Err(anyhow!("Cast error: value is not a map"))
+        Err(anyhow::anyhow!("Cast error: value is not a map").into())
     }
 }
 
 pub(crate) fn cbor_value_to_num<T: NumCast>(value: &Value) -> Result<T> {
     if let Value::Integer(x) = value {
-        Ok(NumCast::from(*x).ok_or(anyhow!(
+        Ok(NumCast::from(*x).ok_or(anyhow::anyhow!(
             "Conversion error: cannot convert [{}] to [{}].",
             x,
             std::any::type_name::<T>()
         ))?)
     } else {
-        Err(anyhow!("Cast error: value is not an integer"))
+        Err(anyhow::anyhow!("Cast error: value is not an integer").into())
     }
 }
 
@@ -122,7 +122,7 @@ pub(crate) fn cbor_value_to_vec_u8(value: &Value) -> Result<Vec<u8>> {
     if let Value::Bytes(xs) = value {
         Ok(xs.to_vec())
     } else {
-        Err(anyhow!("Cast error: value is not a byte array"))
+        Err(anyhow::anyhow!("Cast error: value is not a byte array").into())
     }
 }
 
@@ -131,7 +131,7 @@ pub(crate) fn cbor_value_to_str(value: &Value) -> Result<String> {
     if let Value::Text(s) = value {
         Ok(s.to_string())
     } else {
-        Err(anyhow!("Cast error: value is not a string"))
+        Err(anyhow::anyhow!("Cast error: value is not a string").into())
     }
 }
 
@@ -139,7 +139,7 @@ pub(crate) fn cbor_value_to_bool(value: &Value) -> Result<bool> {
     if let Value::Bool(v) = value {
         Ok(*v)
     } else {
-        Err(anyhow!("Cast error: value is not a boolean"))
+        Err(anyhow::anyhow!("Cast error: value is not a boolean").into())
     }
 }
 
@@ -154,7 +154,7 @@ pub(crate) fn cbor_value_to_vec_string(value: &Value) -> Result<Vec<String>> {
         }
         Ok(strings)
     } else {
-        Err(anyhow!("Cast error: value is not an array"))
+        Err(anyhow::anyhow!("Cast error: value is not an array").into())
     }
 }
 
@@ -168,7 +168,7 @@ pub(crate) fn cbor_value_to_vec_bytes(value: &Value) -> Result<Vec<Vec<u8>>> {
         }
         Ok(bytes)
     } else {
-        Err(anyhow!("Cast error: value is not an array"))
+        Err(anyhow::anyhow!("Cast error: value is not an array").into())
     }
 }
 
@@ -181,10 +181,10 @@ pub(crate) fn cbor_bytes_to_map(bytes: &[u8]) -> Result<BTreeMap<Value, Value>> 
             if let Value::Map(n) = cbor {
                 Ok(n)
             } else {
-                Err(anyhow!("Conversion error: cannot convert bytes to map"))
+                Err(anyhow::anyhow!("Conversion error: cannot convert bytes to map").into())
             }
         }
-        Err(_) => Err(anyhow!("Deserialization error: cannot deserialize bytes")),
+        Err(_) => Err(anyhow::anyhow!("Deserialization error: cannot deserialize bytes").into()),
     }
 }
 

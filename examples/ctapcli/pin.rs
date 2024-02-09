@@ -109,7 +109,7 @@ pub fn pin(device: &FidoKeyHid, command: PinCommand) -> Result<()> {
                             }
                         }
                     }
-                    Err(err) => return Err(err),
+                    Err(err) => return Err(err.into()),
                 };
             }
         }

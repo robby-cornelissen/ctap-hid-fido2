@@ -1,6 +1,6 @@
 use super::FidoKeyHid;
 use crate::ctaphid;
-use anyhow::Result;
+use crate::result::Result;
 
 impl FidoKeyHid {
     /// Lights the LED on the FIDO key

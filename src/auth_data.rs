@@ -1,5 +1,5 @@
 use crate::str_buf::StrBuf;
-use anyhow::Result;
+use crate::result::Result;
 use std::fmt;
 
 #[derive(Debug, Default, Clone)]

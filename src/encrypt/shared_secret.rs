@@ -1,5 +1,7 @@
-use crate::{encrypt::cose::CoseKey, encrypt::enc_aes256_cbc, encrypt::p256, pintoken::PinToken};
-use anyhow::{Error, Result};
+use crate::{
+    encrypt::cose::CoseKey, encrypt::enc_aes256_cbc, encrypt::p256, pintoken::PinToken,
+    result::Result,
+};
 use ring::{agreement, digest, error::Unspecified, rand};
 
 #[derive(Debug, Default, Clone)]
@@ -12,9 +14,9 @@ impl SharedSecret {
     pub fn new(peer_key: &CoseKey) -> Result<Self> {
         let rng = rand::SystemRandom::new();
         let my_private_key = agreement::EphemeralPrivateKey::generate(&agreement::ECDH_P256, &rng)
-            .map_err(Error::msg)?;
+            .map_err(anyhow::Error::msg)?;
 
-        let my_public_key = my_private_key.compute_public_key().map_err(Error::msg)?;
+        let my_public_key = my_private_key.compute_public_key().map_err(anyhow::Error::msg)?;
 
         let peer_public_key = {
             let peer_public_key = p256::P256Key::from_cose(peer_key)?.bytes();
@@ -25,7 +27,7 @@ impl SharedSecret {
             agreement::agree_ephemeral(my_private_key, &peer_public_key, Unspecified, |material| {
                 Ok(digest::digest(&digest::SHA256, material))
             })
-            .map_err(Error::msg)?;
+            .map_err(anyhow::Error::msg)?;
 
         let mut res = SharedSecret {
             public_key: p256::P256Key::from_bytes(my_public_key.as_ref())?.to_cose(),

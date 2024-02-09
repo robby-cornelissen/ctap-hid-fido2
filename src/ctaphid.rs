@@ -1,9 +1,8 @@
 use crate::{
-    error::{CtapError, U2fError},
+    result::{CtapError, Result, U2fError},
     fidokey::FidoKeyHid,
     util,
 };
-use anyhow::{anyhow, Error, Result};
 use std::{thread, time};
 
 //pub const USAGE_PAGE_FIDO: u16 = 0xf1d0;
@@ -57,8 +56,8 @@ pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
 
     //println!("CTAPHID_INIT = {}", util::to_hex_str(&cmd));
 
-    device.write(&cmd).map_err(Error::msg)?;
-    let buf = device.read().map_err(Error::msg)?;
+    device.write(&cmd).map_err(anyhow::Error::msg)?;
+    let buf = device.read().map_err(anyhow::Error::msg)?;
 
     // CID
     Ok([buf[15], buf[16], buf[17], buf[18]])
@@ -80,7 +79,7 @@ fn get_response_status(packet: &[u8]) -> Result<(u8, u16, u8)> {
         // length check ()
         if payload_size > packet.len() as u16 {
             // Consider reformatting this...
-            return Err(anyhow!("u2f response size error?"));
+            return Err(anyhow::anyhow!("u2f response size error?").into());
         }
         // U2F(last byte of data)
         packet[(4 + 2 + payload_size - 1) as usize]
@@ -219,9 +218,9 @@ pub fn ctaphid_wink(device: &FidoKeyHid, cid: &[u8]) -> Result<()> {
         println!("- wink({:02})    = {:?}", cmd.len(), util::to_hex_str(&cmd));
     }
 
-    device.write(&cmd).map_err(Error::msg)?;
+    device.write(&cmd).map_err(anyhow::Error::msg)?;
 
-    let _buf = device.read().map_err(Error::msg)?;
+    let _buf = device.read().map_err(anyhow::Error::msg)?;
 
     if device.enable_log {
         println!(
@@ -252,7 +251,7 @@ fn ctaphid_cbormsg(
     //println!("CTAPHID_CBOR(0) = {}", util::to_hex_str(&res.0));
 
     // Write data to device
-    let _res = device.write(&res.0).map_err(Error::msg)?;
+    let _res = device.write(&res.0).map_err(anyhow::Error::msg)?;
     //println!("Wrote: {:?} byte", res);
 
     // next
@@ -260,7 +259,7 @@ fn ctaphid_cbormsg(
         for seqno in 0..100 {
             let res = create_continuation_packet(seqno, cid, payload);
             //println!("CTAPHID_CBOR(1) = {}", util::to_hex_str(&res.0));
-            let _res = device.write(&res.0).map_err(Error::msg)?;
+            let _res = device.write(&res.0).map_err(anyhow::Error::msg)?;
             if !res.1 {
                 break;
             }
@@ -279,7 +278,7 @@ fn ctaphid_cbormsg(
             Err(_error) => {
                 // Is this just a randomly chosen error message? Sure looks like it...
                 // Maybe call this an HID error? And the other ones CTAP errors?
-                return Err(anyhow!(CtapError::from(0xfe)));
+                return Err(CtapError::from(0xfe).into());
             }
         };
         // println!("Read: {:?} byte", res);
@@ -313,9 +312,9 @@ fn ctaphid_cbormsg(
 
     if is_response_error(st) {
         if st.0 == CTAPHID_MSG {
-            Err(anyhow!(U2fError::from(st.2)))
+            Err(U2fError::from(st.2).into())
         } else {
-            Err(anyhow!(CtapError::from(st.2)))
+            Err(CtapError::from(st.2).into())
         }
     } else {
         let mut payload = ctaphid_cbor_response_get_payload_1(&packet_1st);
@@ -330,7 +329,7 @@ fn ctaphid_cbormsg(
                     Err(_error) => {
                         // Is this just a randomly chosen error message? Sure looks like it...
                         // Maybe call this an HID error? And the other ones CTAP errors?
-                        return Err(anyhow!(CtapError::from(0xfe)));
+                        return Err(CtapError::from(0xfe).into());
                     }
                 };
                 //println!("Read: {:?} byte", &buf[..res]);

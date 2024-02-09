@@ -9,7 +9,8 @@ use crate::encrypt::enc_aes256_cbc;
 use crate::encrypt::enc_hmac_sha_256;
 use crate::encrypt::shared_secret::SharedSecret;
 use crate::pintoken::PinToken;
-use anyhow::{anyhow, Result};
+use crate::result::Result;
+use anyhow::anyhow;
 
 impl FidoKeyHid {
     pub fn get_authenticator_key_agreement(&self, cid: &[u8]) -> Result<cose::CoseKey> {
@@ -43,7 +44,7 @@ impl FidoKeyHid {
 
             Ok(pin_token_dec)
         } else {
-            Err(anyhow!("pin not set"))
+            Err(anyhow!("No PIN provided").into())
         }
     }
 
@@ -79,13 +80,13 @@ impl FidoKeyHid {
 
             Ok(pin_token_dec)
         } else {
-            Err(anyhow!("pin not set"))
+            Err(anyhow!("No PIN provided").into())
         }
     }
 
     pub fn set_pin(&self, cid: &[u8], pin: &str) -> Result<()> {
         if pin.is_empty() {
-            return Err(anyhow!("new pin not set"));
+            return Err(anyhow!("No PIN provided").into());
         }
 
         let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement)?;
@@ -174,10 +175,10 @@ fn create_new_pin_enc(shared_secret: &SharedSecret, new_pin: &str) -> Result<Vec
 
 pub fn change_pin(device: &FidoKeyHid, cid: &[u8], current_pin: &str, new_pin: &str) -> Result<()> {
     if current_pin.is_empty() {
-        return Err(anyhow!("current pin not set"));
+        return Err(anyhow!("Current PIN not provided").into());
     }
     if new_pin.is_empty() {
-        return Err(anyhow!("new pin not set"));
+        return Err(anyhow!("New PIN not provided").into());
     }
 
     let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement)?;

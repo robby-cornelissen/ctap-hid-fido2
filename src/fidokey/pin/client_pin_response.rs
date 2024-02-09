@@ -1,6 +1,5 @@
 use crate::encrypt::cose::CoseKey;
-use crate::util;
-use anyhow::{anyhow, Result};
+use crate::{result::Result, util};
 use serde_cbor::Value;
 
 #[derive(Default)]
@@ -11,7 +10,7 @@ pub struct Pin {
 }
 
 pub fn parse_cbor_client_pin_get_pin_token(bytes: &[u8]) -> Result<Vec<u8>> {
-    let cbor: Value = serde_cbor::from_slice(bytes)?;
+    let cbor: Value = serde_cbor::from_slice(bytes).map_err(anyhow::Error::new)?;
 
     if let Value::Map(n) = cbor {
         // 最初の要素を取得
@@ -22,11 +21,11 @@ pub fn parse_cbor_client_pin_get_pin_token(bytes: &[u8]) -> Result<Vec<u8>> {
             }
         }
     }
-    Err(anyhow!("parse_cbor_client_pin_get_pin_token error"))
+    Err(anyhow::anyhow!("parse_cbor_client_pin_get_pin_token error").into())
 }
 
 pub fn parse_cbor_client_pin_get_keyagreement(bytes: &[u8]) -> Result<CoseKey> {
-    let cbor: Value = serde_cbor::from_slice(bytes)?;
+    let cbor: Value = serde_cbor::from_slice(bytes).map_err(anyhow::Error::new)?;
 
     if let Value::Map(n) = cbor {
         // 最初の要素を取得
@@ -37,12 +36,12 @@ pub fn parse_cbor_client_pin_get_keyagreement(bytes: &[u8]) -> Result<CoseKey> {
             }
         }
     }
-    Err(anyhow!("parse_cbor_client_pin_get_keyagreement error"))
+    Err(anyhow::anyhow!("parse_cbor_client_pin_get_keyagreement error").into())
 }
 
 pub fn parse_cbor_client_pin_get_retries(bytes: &[u8]) -> Result<Pin> {
     // deserialize to a serde_cbor::Value
-    let cbor: Value = serde_cbor::from_slice(bytes)?;
+    let cbor: Value = serde_cbor::from_slice(bytes).map_err(anyhow::Error::new)?;
 
     let mut pin = Pin::default();
 
@@ -59,6 +58,6 @@ pub fn parse_cbor_client_pin_get_retries(bytes: &[u8]) -> Result<Pin> {
         }
         Ok(pin)
     } else {
-        Err(anyhow!("parse_cbor_client_pin_get_retries error"))
+        Err(anyhow::anyhow!("parse_cbor_client_pin_get_retries error").into())
     }
 }

@@ -2,10 +2,10 @@ mod bio_enrollment_command;
 mod bio_enrollment_params;
 mod bio_enrollment_response;
 use crate::pintoken::PinToken;
+use crate::result::Result;
 use crate::util;
 use crate::{ctapdef, ctaphid};
 use crate::{fidokey::pin::Permission::BioEnrollment, FidoKeyHid};
-use anyhow::Result;
 pub use bio_enrollment_command::SubCommand as BioCmd;
 pub use bio_enrollment_params::*;
 

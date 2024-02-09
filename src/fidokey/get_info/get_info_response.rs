@@ -1,7 +1,7 @@
 use super::get_info_params;
 use crate::public_key_credential_parameters::PublicKeyCredentialParameters;
+use crate::result::Result;
 use crate::util;
-use anyhow::Result;
 use serde_cbor::Value;
 
 pub fn parse_cbor(bytes: &[u8]) -> Result<get_info_params::Info> {

@@ -1,8 +1,8 @@
 use super::make_credential_params::{Attestation, Extension};
 use super::CredentialProtectionPolicy;
 use crate::public_key::PublicKey;
+use crate::result::Result;
 use crate::util;
-use anyhow::Result;
 use byteorder::{BigEndian, ReadBytesExt};
 use serde_cbor::Value;
 use std::io::Cursor;

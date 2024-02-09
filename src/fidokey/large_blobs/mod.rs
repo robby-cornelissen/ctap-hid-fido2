@@ -3,7 +3,7 @@ pub mod large_blobs_params;
 pub mod large_blobs_response;
 use super::FidoKeyHid;
 use crate::ctaphid;
-use anyhow::Result;
+use crate::result::Result;
 use large_blobs_params::LargeBlobData;
 
 impl FidoKeyHid {

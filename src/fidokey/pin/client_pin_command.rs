@@ -1,6 +1,6 @@
 use crate::ctapdef;
 use crate::encrypt::cose;
-use anyhow::{anyhow, Result};
+use crate::result::Result;
 use serde_cbor::Value;
 use std::collections::BTreeMap;
 
@@ -202,11 +202,11 @@ pub fn create_payload(sub_command: SubCommand) -> Result<Vec<u8>> {
     match sub_command {
         SubCommand::GetRetries => Ok(create_payload_get_retries()),
         SubCommand::GetKeyAgreement => Ok(create_payload_get_keyagreement()),
-        SubCommand::SetPin => Err(anyhow!("Not Supported")),
-        SubCommand::ChangePin => Err(anyhow!("Not Supported")),
-        SubCommand::GetPinToken => Err(anyhow!("Not Supported")),
-        SubCommand::GetPinUvAuthTokenUsingUvWithPermissions => Err(anyhow!("Not Supported")),
+        SubCommand::SetPin => Err(anyhow::anyhow!("Not Supported").into()),
+        SubCommand::ChangePin => Err(anyhow::anyhow!("Not Supported").into()),
+        SubCommand::GetPinToken => Err(anyhow::anyhow!("Not Supported").into()),
+        SubCommand::GetPinUvAuthTokenUsingUvWithPermissions => Err(anyhow::anyhow!("Not Supported").into()),
         SubCommand::GetUVRetries => Ok(create_payload_get_uv_retries()),
-        SubCommand::GetPinUvAuthTokenUsingPinWithPermissions => Err(anyhow!("Not Supported")),
+        SubCommand::GetPinUvAuthTokenUsingPinWithPermissions => Err(anyhow::anyhow!("Not Supported").into()),
     }
 }

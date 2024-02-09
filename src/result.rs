@@ -1,6 +1,20 @@
 use std::fmt;
 
-#[derive(Debug, Clone)]
+pub type Result<T, E=Error> = std::result::Result<T, E>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    Ctap(#[from] CtapError),
+
+    #[error(transparent)]
+    U2f(#[from] U2fError),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
+#[derive(thiserror::Error, Debug)]
 pub struct CtapError {
     pub code: u8,
     pub name: String,
@@ -86,7 +100,7 @@ impl fmt::Display for CtapError {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(thiserror::Error, Debug)]
 pub struct U2fError {
     pub code: u8,
     pub name: String,

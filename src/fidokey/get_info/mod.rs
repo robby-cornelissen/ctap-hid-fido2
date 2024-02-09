@@ -1,9 +1,9 @@
 use crate::ctaphid;
+use crate::result::Result;
 mod get_info_command;
 mod get_info_params;
 mod get_info_response;
 use super::FidoKeyHid;
-use anyhow::{anyhow, Result};
 
 #[derive(Debug, Clone, PartialEq, strum_macros::AsRefStr)]
 pub enum InfoOption {
@@ -92,7 +92,7 @@ impl FidoKeyHid {
                 let version: String = String::from_utf8(result).unwrap();
                 Ok(version)
             }
-            Err(error) => Err(anyhow!(error)),
+            Err(error) => Err(anyhow::anyhow!(error).into()),
         }
     }
 

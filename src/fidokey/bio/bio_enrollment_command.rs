@@ -1,7 +1,6 @@
 use super::super::sub_command_base::SubCommandBase;
 use super::bio_enrollment_params::TemplateInfo;
-use crate::{ctapdef, encrypt::enc_hmac_sha_256, pintoken::PinToken};
-use anyhow::Result;
+use crate::{ctapdef, encrypt::enc_hmac_sha_256, pintoken::PinToken, result::Result};
 use serde_cbor::{to_vec, Value};
 use std::collections::BTreeMap;
 use strum_macros::EnumProperty;
@@ -69,7 +68,7 @@ pub fn create_payload(
             };
             if let Some(param) = param {
                 map.insert(Value::Integer(0x03), param.clone());
-                sub_command_params_cbor = to_vec(&param)?;
+                sub_command_params_cbor = to_vec(&param).map_err(anyhow::Error::new)?;
             }
         }
 
@@ -104,7 +103,7 @@ pub fn create_payload(
     } else {
         [ctapdef::AUTHENTICATOR_BIO_ENROLLMENT].to_vec()
     };
-    payload.append(&mut to_vec(&cbor)?);
+    payload.append(&mut to_vec(&cbor).map_err(anyhow::Error::new)?);
     Ok(payload)
 }
 

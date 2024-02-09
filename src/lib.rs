@@ -8,7 +8,6 @@ mod encrypt {
     pub mod p256;
     pub mod shared_secret;
 }
-pub mod error;
 mod hmac_ext;
 mod pintoken;
 pub mod public_key;
@@ -16,11 +15,13 @@ pub mod public_key_credential_descriptor;
 pub mod public_key_credential_parameters;
 pub mod public_key_credential_rp_entity;
 pub mod public_key_credential_user_entity;
+pub mod result;
+pub use result::{Error, Result};
 pub mod str_buf;
 pub mod util;
 pub mod verifier;
 
-use anyhow::{anyhow, Result};
+use anyhow::anyhow;
 
 pub mod fidokey;
 pub use fidokey::FidoKeyHid;
@@ -67,10 +68,10 @@ impl FidoKeyHidFactory {
         let device = {
             let mut devs = get_fidokey_devices();
             if devs.is_empty() {
-                return Err(anyhow!("FIDO device not found."));
+                return Err(anyhow!("FIDO device not found.").into());
             }
             if devs.len() > 1 {
-                return Err(anyhow!("Multiple FIDO devices found."));
+                return Err(anyhow!("Multiple FIDO devices found.").into());
             }
 
             let device = devs.pop().unwrap().param;

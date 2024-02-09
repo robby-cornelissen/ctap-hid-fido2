@@ -1,6 +1,6 @@
 use super::large_blobs_params::LargeBlobData;
+use crate::result::Result;
 use crate::util;
-use anyhow::Result;
 use serde_cbor::Value;
 
 pub(crate) fn parse_cbor(bytes: &[u8]) -> Result<LargeBlobData> {

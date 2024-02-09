@@ -6,9 +6,8 @@ use super::{
 };
 use crate::{
     ctaphid, encrypt::enc_hmac_sha_256,
-    public_key_credential_user_entity::PublicKeyCredentialUserEntity,
+    public_key_credential_user_entity::PublicKeyCredentialUserEntity, result::Result,
 };
-use anyhow::Result;
 pub use make_credential_params::{
     Attestation, CredentialSupportedKeyType, Extension, Extension as Mext, MakeCredentialArgs,
     MakeCredentialArgsBuilder,

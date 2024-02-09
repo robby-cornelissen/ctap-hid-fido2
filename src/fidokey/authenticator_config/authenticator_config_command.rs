@@ -1,7 +1,6 @@
 use super::super::sub_command_base::SubCommandBase;
-use crate::{ctapdef, encrypt::enc_hmac_sha_256, pintoken};
+use crate::{ctapdef, encrypt::enc_hmac_sha_256, pintoken, result::Result};
 
-use anyhow::Result;
 use serde_cbor::{to_vec, Value};
 use std::collections::BTreeMap;
 use strum_macros::EnumProperty;
@@ -64,7 +63,7 @@ pub fn create_payload(pin_token: pintoken::PinToken, sub_command: SubCommand) ->
         };
         if let Some(param) = param {
             map.insert(Value::Integer(0x02), Value::Map(param.clone()));
-            sub_command_params_cbor = to_vec(&param)?;
+            sub_command_params_cbor = to_vec(&param).map_err(anyhow::Error::new)?;
         }
     }
 
@@ -92,6 +91,6 @@ pub fn create_payload(pin_token: pintoken::PinToken, sub_command: SubCommand) ->
     // CBOR
     let cbor = Value::Map(map);
     let mut payload = [ctapdef::AUTHENTICATOR_CONFIG].to_vec();
-    payload.append(&mut to_vec(&cbor)?);
+    payload.append(&mut to_vec(&cbor).map_err(anyhow::Error::new)?);
     Ok(payload)
 }

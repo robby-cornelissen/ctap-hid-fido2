@@ -2,8 +2,7 @@ mod client_pin;
 mod client_pin_command;
 mod client_pin_response;
 use super::{get_info::InfoParam, FidoKeyHid};
-use crate::{ctaphid, pintoken::PinToken};
-use anyhow::{anyhow, Result};
+use crate::{ctaphid, pintoken::PinToken, result::Result};
 use client_pin_command::SubCommand as PinCmd;
 pub use client_pin_command::*;
 pub use client_pin_response::*;
@@ -19,9 +18,8 @@ impl FidoKeyHid {
 
         let pin = client_pin_response::parse_cbor_client_pin_get_retries(&response_cbor)?;
 
-        pin.pin_retries.ok_or(anyhow!(
-            "No PIN retries value found in authenticator response"
-        ))
+        pin.pin_retries
+            .ok_or(anyhow::anyhow!("No PIN retries value found in authenticator response").into())
     }
 
     /// Get power cycle state, since CTAP 2.1

@@ -1,7 +1,6 @@
-use crate::HidParam;
-use anyhow::{anyhow, Result};
 use hidapi::HidApi;
 use std::ffi::CString;
+use crate::HidParam;
 
 // Complex Submodules
 pub mod authenticator_config;
@@ -17,6 +16,8 @@ pub mod pin;
 mod selection;
 mod sub_command_base;
 mod wink;
+
+use crate::Result;
 
 pub use get_assertion::{Extension as AssertionExtension, GetAssertionArgsBuilder};
 
@@ -52,7 +53,7 @@ impl FidoKeyHid {
                 return Ok(result);
             }
         }
-        Err(anyhow!("Failed to open device."))
+        Err(anyhow::anyhow!("Failed to open device.").into())
     }
 
     pub(crate) fn write(&self, cmd: &[u8]) -> Result<usize, String> {

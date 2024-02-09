@@ -143,7 +143,7 @@ fn get_rps(device: &FidoKeyHid, pin: Option<&str>) -> Result<Vec<Rp>> {
             if e.to_string().contains("0x2E") {
                 Ok(vec![])
             } else {
-                Err(e)
+                Err(e.into())
             }
         }
     }

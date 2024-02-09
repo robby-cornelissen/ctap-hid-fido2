@@ -3,8 +3,8 @@ mod authenticator_config_command;
 use super::{pin::Permission::AuthenticatorConfiguration, FidoKeyHid};
 
 use crate::ctaphid;
+use crate::result::Result;
 
-use anyhow::{anyhow, Result};
 use authenticator_config_command::SubCommand;
 
 impl FidoKeyHid {
@@ -28,7 +28,7 @@ impl FidoKeyHid {
         let pin = if let Some(v) = pin {
             v
         } else {
-            return Err(anyhow!("need PIN."));
+            return Err(anyhow::anyhow!("need PIN.").into());
         };
 
         let cid = ctaphid::ctaphid_init(self)?;

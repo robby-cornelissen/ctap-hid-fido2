@@ -1,6 +1,6 @@
 use super::bio_enrollment_params::{BioEnrollmentData, TemplateInfo};
 use crate::util;
-use anyhow::Result;
+use crate::result::Result;
 use serde_cbor::Value;
 
 pub(crate) fn parse_cbor(bytes: &[u8]) -> Result<BioEnrollmentData> {

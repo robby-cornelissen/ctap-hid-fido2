@@ -1,6 +1,6 @@
 use super::FidoKeyHid;
 use crate::{ctapdef, ctaphid};
-use anyhow::Result;
+use crate::result::Result;
 
 fn create_payload() -> Vec<u8> {
     // 6.9. authenticatorSelection (0x0B)

@@ -4,9 +4,8 @@ pub mod credential_management_response;
 use super::{pin::Permission::CredentialManagement, FidoKeyHid};
 use crate::{
     ctaphid, public_key_credential_descriptor::PublicKeyCredentialDescriptor,
-    public_key_credential_user_entity::PublicKeyCredentialUserEntity, util,
+    public_key_credential_user_entity::PublicKeyCredentialUserEntity, result::Result, util,
 };
-use anyhow::Result;
 use {
     credential_management_command::SubCommand,
     credential_management_params::{Credential, CredentialManagementData, CredentialsCount, Rp},
