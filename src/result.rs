@@ -60,14 +60,14 @@ impl From<u8> for CtapError {
             0x2E => ("CTAP2_ERR_NO_CREDENTIALS", "No valid credentials provided."),
             0x2F => ("CTAP2_ERR_USER_ACTION_TIMEOUT", "A user action timeout occurred."),
             0x30 => ("CTAP2_ERR_NOT_ALLOWED", "Continuation command, such as, authenticatorGetNextAssertion not allowed."),
-            0x31 => ("CTAP2_ERR_PIN_INVALID", "PIN Invalid."),
-            0x32 => ("CTAP2_ERR_PIN_BLOCKED", "PIN Blocked."),
+            0x31 => ("CTAP2_ERR_PIN_INVALID", "PIN invalid."),
+            0x32 => ("CTAP2_ERR_PIN_BLOCKED", "PIN blocked."),
             0x33 => ("CTAP2_ERR_PIN_AUTH_INVALID", "PIN authentication, pinUvAuthParam, verification failed."),
             0x34 => ("CTAP2_ERR_PIN_AUTH_BLOCKED", "PIN authentication using pinUvAuthToken blocked. Requires power cycle to reset."),
             0x35 => ("CTAP2_ERR_PIN_NOT_SET", "No PIN has been set."),
             0x36 => ("CTAP2_ERR_PIN_REQUIRED", "A pinUvAuthToken is required for the selected operation."),
             0x37 => ("CTAP2_ERR_PIN_POLICY_VIOLATION", "PIN policy violation. Currently only enforces minimum length."),
-            0x38 => ("CTAP2_ERR_PIN_TOKEN_EXPIRED", "pinToken expired on authenticator."), // "Reserved for Future Use" in current spec
+            0x38 => ("CTAP2_ERR_PIN_TOKEN_EXPIRED", "PIN token expired on authenticator."), // "Reserved for Future Use" in current spec
             0x39 => ("CTAP2_ERR_REQUEST_TOO_LARGE", "Authenticator cannot handle this request due to memory constraints."),
             0x3A => ("CTAP2_ERR_ACTION_TIMEOUT", "The current operation has timed out."),
             0x3B => ("CTAP2_ERR_UP_REQUIRED", "User presence is required for the requested operation."),
@@ -76,16 +76,16 @@ impl From<u8> for CtapError {
             0x3E => ("CTAP2_ERR_INVALID_SUBCOMMAND", "The requested subcommand is either invalid or not implemented."),
             0x3F => ("CTAP2_ERR_UV_INVALID", "Built-in user verification unsuccessful. The platform SHOULD retry."),
             0x40 => ("CTAP2_ERR_UNAUTHORIZED_PERMISSION", "The permissions parameter contains an unauthorized permission."),
-            0x7F => ("CTAP1_ERR_OTHER", "Other unspecified error."),
-            0xDF => ("CTAP2_ERR_SPEC_LAST", "CTAP 2 spec last error."),
-            0xE0 => ("CTAP2_ERR_EXTENSION_FIRST", "Extension specific error."),
-            0xE1..=0xEE => ("CTAP2_ERR_EXTENSION", "Extension specific error."),
-            0xEF => ("CTAP2_ERR_EXTENSION_LAST", "Extension specific error."),
-            0xF0 => ("CTAP2_ERR_VENDOR_FIRST", "Vendor specific error."),
-            0xF1..=0xFE => ("CTAP2_ERR_VENDOR", "Vendor specific error."),
-            0xFF => ("CTAP2_ERR_VENDOR_LAST", "Vendor specific error."),
-            // CTAP仕様にない、謎のステータス
-            0x6A => ("EXT_BIOPASS_ERR_UNKNOWN", "BioPass unknown error."),
+            0x7F..=0xDE => ("CTAP1_ERR_OTHER", "Other unspecified error."),
+            0xDF => ("CTAP2_ERR_SPEC_LAST", "Other unspecified error."),
+            0xE0 => ("CTAP2_ERR_EXTENSION_FIRST", "Extension-specific error."),
+            0xE1..=0xEE => ("CTAP2_ERR_EXTENSION", "Extension-specific error."),
+            0xEF => ("CTAP2_ERR_EXTENSION_LAST", "Extension-specific error."),
+            0xF0 => ("CTAP2_ERR_VENDOR_FIRST", "Vendor-specific error."),
+            0xF1..=0xFE => ("CTAP2_ERR_VENDOR", "Vendor-specific error."),
+            0xFF => ("CTAP2_ERR_VENDOR_LAST", "Vendor-specific error."),
+            // Outside of specificiation
+            0x6A => ("EXT_BIOPASS_ERR_UNKNOWN", "Feitian BioPass unknown error."),
             _ => ("ERR_UNKNOWN", "Unknown CTAP error"),
         };
 
@@ -117,8 +117,8 @@ impl From<u8> for U2fError {
                 0x69 => ("SW_CONDITIONS_NOT_SATISFIED (0x6985)", "The request was rejected due to test-of-user-presence being required."),
                 0x6A => ("SW_WRONG_DATA (0x6A80)", "The request was rejected due to an invalid key handle."),
                 0x67 => ("SW_WRONG_LENGTH (0x6700)", "The length of the request was invalid."),
-                0x6E => ("SW_CLA_NOT_SUPPORTED (0x6E00)", "The Class byte of the request is not supported."),
-                0x6D => ("SW_INS_NOT_SUPPORTED (0x6D00)", "The Instruction of the request is not supported."),
+                0x6E => ("SW_CLA_NOT_SUPPORTED (0x6E00)", "The class byte of the request is not supported."),
+                0x6D => ("SW_INS_NOT_SUPPORTED (0x6D00)", "The instruction of the request is not supported."),
                 _ => ("ERR_UNKNOWN", "Unknown U2F error"),
         };
 
