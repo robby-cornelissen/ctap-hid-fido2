@@ -5,13 +5,16 @@ pub type Result<T, E=Error> = std::result::Result<T, E>;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    Ctap(#[from] CtapError),
+    CTAP(#[from] CtapError),
 
     #[error(transparent)]
-    U2f(#[from] U2fError),
+    U2F(#[from] U2fError),
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
+
+    #[error("Unknown error: {0}")]
+    Unknown(String)
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -83,7 +86,7 @@ impl From<u8> for CtapError {
             0xFF => ("CTAP2_ERR_VENDOR_LAST", "Vendor specific error."),
             // CTAP仕様にない、謎のステータス
             0x6A => ("EXT_BIOPASS_ERR_UNKNOWN", "BioPass unknown error."),
-            _ => ("ERR_UNKNOWN", "Unknown error"),
+            _ => ("ERR_UNKNOWN", "Unknown CTAP error"),
         };
 
         CtapError {
@@ -116,7 +119,7 @@ impl From<u8> for U2fError {
                 0x67 => ("SW_WRONG_LENGTH (0x6700)", "The length of the request was invalid."),
                 0x6E => ("SW_CLA_NOT_SUPPORTED (0x6E00)", "The Class byte of the request is not supported."),
                 0x6D => ("SW_INS_NOT_SUPPORTED (0x6D00)", "The Instruction of the request is not supported."),
-                _ => ("ERR_UNKNOWN", "Unknown error"),
+                _ => ("ERR_UNKNOWN", "Unknown U2F error"),
         };
 
         U2fError {
