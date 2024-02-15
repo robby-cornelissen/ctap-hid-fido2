@@ -1,6 +1,6 @@
 use super::make_credential_params::Extension as Mext;
 use super::CredentialProtectionPolicy;
-use crate::public_key::PublicKey;
+use crate::{public_key::PublicKey, public_key_credential_rp_entity::PublicKeyCredentialRpEntity};
 use crate::public_key_credential_descriptor::PublicKeyCredentialDescriptor;
 use crate::public_key_credential_user_entity::PublicKeyCredentialUserEntity;
 use crate::str_buf::StrBuf;
@@ -97,6 +97,7 @@ pub struct MakeCredentialArgs<'a> {
     pub uv: Option<bool>,
     pub exclude_list: Vec<Vec<u8>>,
     pub user_entity: Option<PublicKeyCredentialUserEntity>,
+    pub rp_entity: Option<PublicKeyCredentialRpEntity>,
     pub rk: Option<bool>,
     pub extensions: Option<Vec<Mext>>,
 }
@@ -115,6 +116,7 @@ pub struct MakeCredentialArgsBuilder<'a> {
     uv: Option<bool>,
     exclude_list: Vec<Vec<u8>>,
     user_entity: Option<PublicKeyCredentialUserEntity>,
+    rp_entity: Option<PublicKeyCredentialRpEntity>,
     rk: Option<bool>,
     extensions: Option<Vec<Mext>>,
 }
@@ -131,7 +133,6 @@ impl<'a> MakeCredentialArgsBuilder<'a> {
 
     pub fn pin(mut self, pin: &'a str) -> MakeCredentialArgsBuilder<'a> {
         self.pin = Some(pin);
-        //self.uv = Some(false);
         self.uv = None;
         self
     }
@@ -142,7 +143,7 @@ impl<'a> MakeCredentialArgsBuilder<'a> {
         self
     }
 
-    /// Adds an credential_id to the excludeList, preventing further credentials being created on
+    /// Adds a credential_id to the excludeList, preventing further credentials being created on
     /// the same authenticator
     pub fn exclude_authenticator(mut self, credential_id: &[u8]) -> MakeCredentialArgsBuilder<'a> {
         self.exclude_list.push(credential_id.to_vec());
@@ -170,6 +171,18 @@ impl<'a> MakeCredentialArgsBuilder<'a> {
         self
     }
 
+    // There's some additional work to be done here because the ID of the RP
+    // entity might conflict with the one already set on the builder. Probably
+    // should favor refactoring to require the RP entity instead of the RP ID
+    // on the builder's constructor.
+    pub fn rp_entity(
+        mut self,
+        rp_entity: &PublicKeyCredentialRpEntity,
+    ) -> MakeCredentialArgsBuilder<'a> {
+        self.rp_entity = Some(rp_entity.clone());
+        self
+    }
+
     pub fn resident_key(mut self) -> MakeCredentialArgsBuilder<'a> {
         self.rk = Some(true);
         self
@@ -184,6 +197,7 @@ impl<'a> MakeCredentialArgsBuilder<'a> {
             uv: self.uv,
             exclude_list: self.exclude_list,
             user_entity: self.user_entity,
+            rp_entity: self.rp_entity,
             rk: self.rk,
             extensions: self.extensions,
         }

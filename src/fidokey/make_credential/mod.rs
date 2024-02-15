@@ -26,7 +26,7 @@ impl FidoKeyHid {
             }
         };
 
-        // create cmmand
+        // create command
         let send_payload = {
             let mut params =
                 make_credential_command::Params::new(&args.rpid, args.challenge.to_vec(), user_id);
@@ -42,9 +42,15 @@ impl FidoKeyHid {
                 args.key_types.clone()
             };
 
-            if let Some(rkp) = &args.user_entity {
-                params.user_name = rkp.name.to_string();
-                params.user_display_name = rkp.display_name.to_string();
+            if let Some(user_entity) = &args.user_entity {
+                params.user_name = user_entity.name.to_string();
+                params.user_display_name = user_entity.display_name.to_string();
+            }
+
+            // This is somewhat problematic because the RP entity's ID might conflict with
+            // the ID that has already been set on the args.
+            if let Some(rp_entity) = &args.rp_entity {
+                params.rp_name = rp_entity.name.to_string();
             }
 
             // get pintoken & create pin auth
