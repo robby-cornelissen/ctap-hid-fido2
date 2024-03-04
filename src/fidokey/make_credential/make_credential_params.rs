@@ -23,7 +23,7 @@ pub struct Attestation {
     pub credential_publickey: PublicKey,
     pub extensions: Vec<Extension>,
     pub auth_data: Vec<u8>,
-
+    pub attstmt_raw: Vec<u8>,
     pub attstmt_alg: i32,
     pub attstmt_sig: Vec<u8>,
     pub attstmt_x5c: Vec<Vec<u8>>,

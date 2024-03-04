@@ -4,11 +4,13 @@ use crate::public_key::PublicKey;
 use crate::result::Result;
 use crate::util;
 use byteorder::{BigEndian, ReadBytesExt};
-use serde_cbor::Value;
+use serde_cbor::{to_vec, Value};
 use std::io::Cursor;
 
 fn parse_cbor_att_stmt(obj: &Value, att: &mut Attestation) -> Result<()> {
     if let Value::Map(xs) = obj {
+        // not the cleanest error handling here
+        att.attstmt_raw = to_vec(obj).map_err(|e| anyhow::anyhow!(e.to_string()))?;
         for (key, val) in xs {
             if let Value::Text(s) = key {
                 let ss = s.as_str();

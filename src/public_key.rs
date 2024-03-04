@@ -1,6 +1,6 @@
 use crate::encrypt::cose::CoseKey;
 use crate::util;
-use serde_cbor::Value;
+use serde_cbor::{to_vec, Value};
 use std::fmt;
 
 #[derive(Debug, Default, Clone)]
@@ -16,6 +16,7 @@ pub struct PublicKey {
     pub key_type: PublicKeyType,
     pub pem: String,
     pub der: Vec<u8>,
+    pub raw: Vec<u8>,
 }
 impl PublicKey {
     pub fn new(cbor: &Value) -> Self {
@@ -32,6 +33,8 @@ impl PublicKey {
         };
         public_key.der = cose_key.to_public_key_der();
         public_key.pem = util::convert_to_publickey_pem(&public_key.der);
+        // need to rework error handling here
+        public_key.raw = to_vec(cbor).expect("Cannot convert CBOR public key to vec");
         public_key
     }
 
