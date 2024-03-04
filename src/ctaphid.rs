@@ -1,6 +1,6 @@
 use crate::{
-    result::{CtapError, Result, U2fError},
     fidokey::FidoKeyHid,
+    result::{CtapError, Result, U2fError},
     util,
 };
 use std::{thread, time};
@@ -22,7 +22,7 @@ const CTAPHID_ERROR: u8 = CTAP_FRAME_INIT | 0x3F;
 const CTAPHID_KEEPALIVE: u8 = CTAP_FRAME_INIT | 0x3B;
 
 //const CTAPHID_KEEPALIVE_STATUS_PROCESSING = 1;     // The authenticator is still processing the current request.
-//const CTAPHID_KEEPALIVE_STATUS_UPNEEDED = 2;       // The authenticator is waiting for user presence.
+const CTAPHID_KEEPALIVE_STATUS_UP_NEEDED: u8 = 0x02; // The authenticator is waiting for user presence.
 
 pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
     // CTAPHID_INIT
@@ -293,8 +293,11 @@ fn ctaphid_cbormsg(
             break;
         } else if st.0 == CTAPHID_KEEPALIVE {
             if !keep_alive_msg_flag {
-                if !device.keep_alive_msg.is_empty() {
-                    println!("{}", device.keep_alive_msg);
+                if st.2 == CTAPHID_KEEPALIVE_STATUS_UP_NEEDED {
+                    // could use some renaming here; up_needed_msg or something?
+                    if !device.keep_alive_msg.is_empty() {
+                        println!("{}", device.keep_alive_msg);
+                    }
                 }
                 keep_alive_msg_flag = true;
             }
