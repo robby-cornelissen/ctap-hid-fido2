@@ -45,6 +45,7 @@ pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
     cmd[7] = 0x08;
 
     // nonce
+    // Hmmm... doesn't seem overly secure
     cmd[8] = 0xfc;
     cmd[9] = 0x8c;
     cmd[10] = 0xc9;
@@ -128,7 +129,7 @@ fn ctaphid_cbor_response_get_payload_2(packet: &[u8]) -> Vec<u8> {
     packet[5..64].to_vec()
 }
 
-fn create_initialization_packet(cid: &[u8], commoand: u8, payload: &[u8]) -> (Vec<u8>, bool) {
+fn create_initialization_packet(cid: &[u8], command: u8, payload: &[u8]) -> (Vec<u8>, bool) {
     let mut cmd: Vec<u8> = vec![0; PACKET_SIZE];
 
     // Report ID
@@ -144,7 +145,7 @@ fn create_initialization_packet(cid: &[u8], commoand: u8, payload: &[u8]) -> (Ve
 
     // Command identifier (bit 7 always set)
     // ex. CTAP_FRAME_INIT(0x80) | CTAPHID_CBOR (0x10)
-    cmd[5] = commoand;
+    cmd[5] = command;
 
     // High part of payload length
     cmd[6] = ((payload.len() as u16) >> 8) as u8;
