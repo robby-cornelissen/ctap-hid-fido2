@@ -1,6 +1,6 @@
 mod authenticator_config_command;
 
-use super::{pin::Permission::AuthenticatorConfiguration, FidoKeyHid};
+use super::{pin::Permissions, FidoKeyHid};
 
 use crate::ctaphid;
 use crate::result::Result;
@@ -35,7 +35,7 @@ impl FidoKeyHid {
 
         // get pintoken
         let pin_token =
-            self.get_pinuv_auth_token_with_permission(&cid, pin, AuthenticatorConfiguration)?;
+            self.get_pinuv_auth_token_with_permission(&cid, pin, Permissions::AUTHENTICATOR_CONFIGURATION)?;
 
         let send_payload = authenticator_config_command::create_payload(pin_token, sub_command)?;
         let _response_cbor = ctaphid::ctaphid_cbor(self, &cid, &send_payload)?;

@@ -1,7 +1,7 @@
 pub mod credential_management_command;
 pub mod credential_management_params;
 pub mod credential_management_response;
-use super::{pin::Permission::CredentialManagement, FidoKeyHid};
+use super::{pin::Permissions, FidoKeyHid};
 use crate::{
     ctaphid, public_key_credential_descriptor::PublicKeyCredentialDescriptor,
     public_key_credential_user_entity::PublicKeyCredentialUserEntity, result::Result, util,
@@ -101,7 +101,7 @@ impl FidoKeyHid {
                     Some(self.get_pinuv_auth_token_with_permission(
                         &cid,
                         pin,
-                        CredentialManagement,
+                        Permissions::CREDENTIAL_MANAGEMENT,
                     )?)
                 }
             } else {

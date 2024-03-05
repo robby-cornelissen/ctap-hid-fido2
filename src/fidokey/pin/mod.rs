@@ -76,7 +76,7 @@ impl FidoKeyHid {
             // It might be better to request an undefined permission and get a token with no permissions
             // See https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#getPinUvAuthTokenUsingPinWithPermissions
             true => {
-                self.get_pinuv_auth_token_with_permission(&cid, pin, Permission::LargeBlobWrite)
+                self.get_pinuv_auth_token_with_permission(&cid, pin, Permissions::LARGE_BLOB_WRITE)
             }
             false => self.get_pin_token(&cid, pin),
         }
@@ -116,7 +116,7 @@ mod tests {
         hid_cfg.enable_log = true;
         let device = FidoKeyHid::new(&hid_params, &hid_cfg).unwrap();
 
-        match device.get_any_pin_token("3471") {
+        match device.get_any_pin_token("0000") {
             Ok(_) => println!("Got PIN token"),
             Err(e) => println!("{}", e),
         }

@@ -16,15 +16,16 @@ pub enum SubCommand {
     GetPinUvAuthTokenUsingPinWithPermissions = 0x09,
 }
 
-#[allow(dead_code)]
-// This entire thing needs to be refactored to use bitflags; multiple permissions can be requested
-pub enum Permission {
-    MakeCredential = 0x01,
-    GetAssertion = 0x02,
-    CredentialManagement = 0x04,
-    BioEnrollment = 0x08,
-    LargeBlobWrite = 0x10,
-    AuthenticatorConfiguration = 0x20,
+bitflags::bitflags! {
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct Permissions: u8 {
+        const MAKE_CREDENTIAL = 0x01;
+        const GET_ASSERTION = 0x02;
+        const CREDENTIAL_MANAGEMENT = 0x04;
+        const BIO_ENROLLMENT = 0x08;
+        const LARGE_BLOB_WRITE = 0x10;
+        const AUTHENTICATOR_CONFIGURATION = 0x20;
+    }
 }
 
 fn create_payload_get_uv_retries() -> Vec<u8> {
@@ -90,7 +91,7 @@ pub fn create_payload_change_pin(
 pub fn create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
     key_agreement: &cose::CoseKey,
     pin_hash_enc: &[u8],
-    permission: Permission,
+    permissions: Permissions,
 ) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_protocol(&mut map);
@@ -105,7 +106,7 @@ pub fn create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
     map.insert(Value::Integer(0x06), value);
 
     // permission(0x09) - Unsigned Integer
-    let value = Value::Integer(permission as i128);
+    let value = Value::Integer(permissions.bits() as i128);
     map.insert(Value::Integer(0x09), value);
 
     to_payload(map)
@@ -205,8 +206,12 @@ pub fn create_payload(sub_command: SubCommand) -> Result<Vec<u8>> {
         SubCommand::SetPin => Err(anyhow::anyhow!("Not Supported").into()),
         SubCommand::ChangePin => Err(anyhow::anyhow!("Not Supported").into()),
         SubCommand::GetPinToken => Err(anyhow::anyhow!("Not Supported").into()),
-        SubCommand::GetPinUvAuthTokenUsingUvWithPermissions => Err(anyhow::anyhow!("Not Supported").into()),
+        SubCommand::GetPinUvAuthTokenUsingUvWithPermissions => {
+            Err(anyhow::anyhow!("Not Supported").into())
+        }
         SubCommand::GetUVRetries => Ok(create_payload_get_uv_retries()),
-        SubCommand::GetPinUvAuthTokenUsingPinWithPermissions => Err(anyhow::anyhow!("Not Supported").into()),
+        SubCommand::GetPinUvAuthTokenUsingPinWithPermissions => {
+            Err(anyhow::anyhow!("Not Supported").into())
+        }
     }
 }

@@ -1,5 +1,5 @@
 use super::client_pin_command;
-use super::client_pin_command::Permission;
+use super::client_pin_command::Permissions;
 use super::client_pin_command::SubCommand as PinCmd;
 use super::client_pin_response;
 use super::FidoKeyHid;
@@ -52,7 +52,7 @@ impl FidoKeyHid {
         &self,
         cid: &[u8],
         pin: &str,
-        permission: Permission,
+        permissions: Permissions,
     ) -> Result<PinToken> {
         if !pin.is_empty() {
             let authenticator_key_agreement = self.get_authenticator_key_agreement(cid)?;
@@ -67,7 +67,7 @@ impl FidoKeyHid {
                 client_pin_command::create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
                     &shared_secret.public_key,
                     &pin_hash_enc,
-                    permission,
+                    permissions,
                 );
             let response_cbor = ctaphid::ctaphid_cbor(self, cid, &send_payload)?;
 

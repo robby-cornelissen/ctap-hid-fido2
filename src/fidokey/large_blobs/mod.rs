@@ -36,7 +36,7 @@ impl FidoKeyHid {
             Some(self.get_pinuv_auth_token_with_permission(
                 &cid,
                 pin,
-                super::pin::Permission::LargeBlobWrite,
+                super::pin::Permissions::LARGE_BLOB_WRITE,
             )?)
         } else {
             None
