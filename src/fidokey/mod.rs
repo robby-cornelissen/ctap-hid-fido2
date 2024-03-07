@@ -1,7 +1,7 @@
+use crate::HidParam;
 use hidapi::HidApi;
 use std::ffi::CString;
 use std::sync::mpsc::Sender;
-use crate::HidParam;
 
 // Complex Submodules
 pub mod authenticator_config;
@@ -31,12 +31,16 @@ pub struct FidoKeyHid {
     pub enable_log: bool,
     pub use_pre_bio_enrollment: bool,
     pub use_pre_credential_management: bool,
-    pub keep_alive_msg: String,
-    pub prompt_tx: Option<Sender<String>>,
+    pub up_needed_prompt: String, // should turn this into an option
+    pub prompt_tx: Option<Sender<Option<String>>>,
 }
 
 impl FidoKeyHid {
-    pub fn new(params: &[crate::HidParam], cfg: &crate::LibCfg, prompt_tx: Option<Sender<String>>) -> Result<Self> {
+    pub fn new(
+        params: &[crate::HidParam],
+        cfg: &crate::LibCfg,
+        prompt_tx: Option<Sender<Option<String>>>,
+    ) -> Result<Self> {
         let api = HidApi::new().expect("Failed to create HidApi instance");
         for param in params {
             let path = get_path(&api, param);
@@ -50,7 +54,7 @@ impl FidoKeyHid {
                     enable_log: cfg.enable_log,
                     use_pre_bio_enrollment: cfg.use_pre_bio_enrollment,
                     use_pre_credential_management: cfg.use_pre_credential_management,
-                    keep_alive_msg: cfg.keep_alive_msg.to_string(),
+                    up_needed_prompt: cfg.keep_alive_msg.to_string(),
                     prompt_tx,
                 };
                 return Ok(result);
@@ -59,10 +63,28 @@ impl FidoKeyHid {
         Err(anyhow::anyhow!("Failed to open device.").into())
     }
 
+    pub fn prompt(&self, prompt: Option<String>) -> Result<()> {
+        if !self.up_needed_prompt.is_empty() {
+            if self.prompt_tx.is_some() {
+                self.prompt_tx
+                    .as_ref()
+                    .unwrap()
+                    .send(prompt.clone())
+                    .map_err(|e| anyhow::anyhow!(e))?;
+            }
+
+            if let Some(prompt) = prompt {
+                println!("{}", prompt);
+            }
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn write(&self, cmd: &[u8]) -> Result<usize, String> {
         match self.device_internal.write(cmd) {
             Ok(size) => Ok(size),
-            Err(_) => Err("write error".into()),
+            Err(_) => Err("Write error".into()),
         }
     }
 
@@ -70,7 +92,7 @@ impl FidoKeyHid {
         let mut buf: Vec<u8> = vec![0; 64];
         match self.device_internal.read(&mut buf[..]) {
             Ok(_) => Ok(buf),
-            Err(_) => Err("read error".into()),
+            Err(_) => Err("Read error".into()),
         }
     }
 }

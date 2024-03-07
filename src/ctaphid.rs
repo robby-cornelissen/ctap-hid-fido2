@@ -248,87 +248,104 @@ fn ctaphid_cbormsg(
     }
 
     // initialization_packet
-    let res = create_initialization_packet(cid, command, payload);
-    //println!("CTAPHID_CBOR(0) = {}", util::to_hex_str(&res.0));
+    let request = create_initialization_packet(cid, command, payload);
+    // println!("CTAPHID_CBOR(0) = {}", util::to_hex_str(&request.0));
 
     // Write data to device
-    let _res = device.write(&res.0).map_err(anyhow::Error::msg)?;
-    //println!("Wrote: {:?} byte", res);
+    let _size = device.write(&request.0).map_err(anyhow::Error::msg)?;
+    // println!("Wrote: {:?} bytes", _size);
 
     // next
-    if res.1 {
-        for seqno in 0..100 {
-            let res = create_continuation_packet(seqno, cid, payload);
-            //println!("CTAPHID_CBOR(1) = {}", util::to_hex_str(&res.0));
-            let _res = device.write(&res.0).map_err(anyhow::Error::msg)?;
-            if !res.1 {
+    if request.1 {
+        for seq_no in 0..100 {
+            let request = create_continuation_packet(seq_no, cid, payload);
+            // println!("CTAPHID_CBOR(1) = {}", util::to_hex_str(&request.0));
+
+            let _size = device.write(&request.0).map_err(anyhow::Error::msg)?;
+            // println!("Wrote: {:?} bytes", _size);
+
+            if !request.1 {
                 break;
             }
         }
     }
 
-    // read - 1st packet
-    let mut keep_alive_msg_flag = false;
-    let mut st: (u8, u16, u8) = (0, 0, 0);
-    let mut packet_1st = vec![];
+    // read - first packet
+    let mut up_needed_prompt_flag = false;
+    let mut response_status: (u8, u16, u8) = (0, 0, 0);
+    let mut first_packet = vec![];
+
     for _counter in 0..500 {
         // println!("counter: {:?}", _counter);
 
-        let buf = match device.read() {
-            Ok(res) => res,
+        let response = match device.read() {
+            Ok(result) => result,
             Err(_error) => {
                 // Is this just a randomly chosen error message? Sure looks like it...
                 // Maybe call this an HID error? And the other ones CTAP errors?
                 return Err(CtapError::from(0xfe).into());
             }
         };
-        // println!("Read: {:?} byte", res);
+        // println!("Read: {:?}", response);
 
         if command != CTAPHID_CBOR && command != CTAPHID_MSG {
-            return Ok(buf);
+            if up_needed_prompt_flag {
+                device.prompt(None)?;
+            }
+
+            return Ok(response);
         }
 
-        st = get_response_status(&buf)?;
-        if st.0 == CTAPHID_CBOR || st.0 == CTAPHID_MSG {
-            packet_1st = buf;
-            break;
-        } else if st.0 == CTAPHID_KEEPALIVE {
-            if !keep_alive_msg_flag {
-                if st.2 == CTAPHID_KEEPALIVE_STATUS_UP_NEEDED {
-                    // could use some renaming here; up_needed_msg or something?
-                    if !device.keep_alive_msg.is_empty() {
-                        if device.prompt_tx.is_some() {
-                            // not the cleanest implementation, will panic
-                            device.prompt_tx.as_ref().unwrap().send(device.keep_alive_msg.to_string()).unwrap();
-                        }
-                        println!("{}", device.keep_alive_msg);
-                    }
-                }
-                keep_alive_msg_flag = true;
+        response_status = get_response_status(&response)?;
+
+        if response_status.0 == CTAPHID_CBOR || response_status.0 == CTAPHID_MSG {
+            if up_needed_prompt_flag {
+                device.prompt(None)?;
             }
+
+            first_packet = response;
+            break;
+        } else if response_status.0 == CTAPHID_KEEPALIVE {
+            if !up_needed_prompt_flag {
+                if response_status.2 == CTAPHID_KEEPALIVE_STATUS_UP_NEEDED {
+                    device.prompt(Some(device.up_needed_prompt.to_string()))?;
+                }
+                up_needed_prompt_flag = true;
+            }
+
             thread::sleep(time::Duration::from_millis(100));
-        } else if st.0 == CTAPHID_ERROR {
-            println!("CTAPHID_ERROR Error code = 0x{:02x}", st.2);
+        } else if response_status.0 == CTAPHID_ERROR {
+            if up_needed_prompt_flag {
+                device.prompt(None)?;
+            }
+
+            println!("CTAPHID_ERROR Error code = 0x{:02x}", response_status.2);
+
             break;
         } else {
-            println!("err");
+            if up_needed_prompt_flag {
+                device.prompt(None)?;
+            }
+
+            println!("CTAPHID_ERROR Unknown status");
+
             break;
         }
     }
 
     // println!("response_status = 0x{:02X}", st.2);
 
-    if is_response_error(st) {
-        if st.0 == CTAPHID_MSG {
-            Err(U2fError::from(st.2).into())
+    if is_response_error(response_status) {
+        if response_status.0 == CTAPHID_MSG {
+            Err(U2fError::from(response_status.2).into())
         } else {
-            Err(CtapError::from(st.2).into())
+            Err(CtapError::from(response_status.2).into())
         }
     } else {
-        let mut payload = ctaphid_cbor_response_get_payload_1(&packet_1st);
+        let mut payload = ctaphid_cbor_response_get_payload_1(&first_packet);
 
         // Is Exists Next Packet?
-        let payload_size = st.1;
+        let payload_size = response_status.1;
         if (payload.len() as u16) < payload_size {
             for _ in 1..=100 {
                 // read next packet
@@ -355,7 +372,7 @@ fn ctaphid_cbormsg(
         }
 
         // get data
-        let data = get_data(st, payload);
+        let data = get_data(response_status, payload);
 
         if device.enable_log {
             println!();

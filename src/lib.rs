@@ -66,7 +66,7 @@ pub fn get_fidokey_devices() -> Vec<HidInfo> {
 pub struct FidoKeyHidFactory {}
 
 impl FidoKeyHidFactory {
-    pub fn create(cfg: &LibCfg, prompt_tx: Option<Sender<String>>) -> Result<FidoKeyHid> {
+    pub fn create(cfg: &LibCfg, prompt_tx: Option<Sender<Option<String>>>) -> Result<FidoKeyHid> {
         let device = {
             let mut devs = get_fidokey_devices();
             if devs.is_empty() {
@@ -84,7 +84,7 @@ impl FidoKeyHidFactory {
         Ok(device)
     }
 
-    pub fn create_by_params(params: &[HidParam], cfg: &LibCfg, prompt_tx: Option<Sender<String>>) -> Result<FidoKeyHid> {
+    pub fn create_by_params(params: &[HidParam], cfg: &LibCfg, prompt_tx: Option<Sender<Option<String>>>) -> Result<FidoKeyHid> {
         FidoKeyHid::new(params, cfg, prompt_tx)
     }
 }
