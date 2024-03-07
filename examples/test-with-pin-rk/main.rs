@@ -29,7 +29,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let device = FidoKeyHidFactory::create(&cfg)?;
+    let device = FidoKeyHidFactory::create(&cfg, None)?;
 
     //
     // Builder Pattern Sample

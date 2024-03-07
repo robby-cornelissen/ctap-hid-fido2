@@ -1,7 +1,7 @@
 use ctap_hid_fido2::{Cfg, FidoKeyHidFactory};
 
 fn main() {
-    let device = match FidoKeyHidFactory::create(&Cfg::init()) {
+    let device = match FidoKeyHidFactory::create(&Cfg::init(), None) {
         Ok(d) => d,
         Err(e) => {
             println!("error: {:?}", e);

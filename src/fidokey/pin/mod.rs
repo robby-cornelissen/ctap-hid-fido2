@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn test_client_pin_get_keyagreement() {
         let hid_params = HidParam::get();
-        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
         let cid = ctaphid::ctaphid_init(&device).unwrap();
 
         let send_payload = create_payload(PinCmd::GetKeyAgreement).unwrap();
@@ -114,7 +114,7 @@ mod tests {
         let hid_params = HidParam::get();
         let mut hid_cfg = Cfg::init();
         hid_cfg.enable_log = true;
-        let device = FidoKeyHid::new(&hid_params, &hid_cfg).unwrap();
+        let device = FidoKeyHid::new(&hid_params, &hid_cfg, None).unwrap();
 
         match device.get_any_pin_token("0000") {
             Ok(_) => println!("Got PIN token"),

@@ -1,5 +1,6 @@
 use hidapi::HidApi;
 use std::ffi::CString;
+use std::sync::mpsc::Sender;
 use crate::HidParam;
 
 // Complex Submodules
@@ -31,10 +32,11 @@ pub struct FidoKeyHid {
     pub use_pre_bio_enrollment: bool,
     pub use_pre_credential_management: bool,
     pub keep_alive_msg: String,
+    pub prompt_tx: Option<Sender<String>>,
 }
 
 impl FidoKeyHid {
-    pub fn new(params: &[crate::HidParam], cfg: &crate::LibCfg) -> Result<Self> {
+    pub fn new(params: &[crate::HidParam], cfg: &crate::LibCfg, prompt_tx: Option<Sender<String>>) -> Result<Self> {
         let api = HidApi::new().expect("Failed to create HidApi instance");
         for param in params {
             let path = get_path(&api, param);
@@ -49,6 +51,7 @@ impl FidoKeyHid {
                     use_pre_bio_enrollment: cfg.use_pre_bio_enrollment,
                     use_pre_credential_management: cfg.use_pre_credential_management,
                     keep_alive_msg: cfg.keep_alive_msg.to_string(),
+                    prompt_tx,
                 };
                 return Ok(result);
             }
@@ -91,4 +94,14 @@ fn get_path(api: &hidapi::HidApi, param: &crate::HidParam) -> Option<CString> {
     };
 
     None
+}
+
+impl Drop for FidoKeyHid {
+    // When the FidoKeyHid instance is dropped, we also drop the prompt sender;
+    // this should close the channel as well and unblock the receiver.
+    fn drop(&mut self) {
+        if self.prompt_tx.is_some() {
+            drop(self.prompt_tx.take());
+        }
+    }
 }

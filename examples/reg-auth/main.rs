@@ -17,7 +17,7 @@ fn main() {
         .build();
 
     // create `FidoKeyHid`
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
 
     // get `Attestation` Object
     let attestation = device

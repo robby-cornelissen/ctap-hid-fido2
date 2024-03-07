@@ -14,14 +14,14 @@ fn test_get_hid_devices() {
 
 #[test]
 fn test_wink() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     device.wink().unwrap();
     assert!(true);
 }
 
 #[test]
 fn test_get_info() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     device.get_info().unwrap();
     // println!("{}", device.get_info().unwrap());
     assert!(true);
@@ -29,7 +29,7 @@ fn test_get_info() {
 
 #[test]
 fn test_get_info_u2f() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     match device.is_info_param_enabled(&InfoParam::VersionsU2Fv2) {
         Ok(result) => {
             if !result {
@@ -46,7 +46,7 @@ fn test_get_info_u2f() {
 
 #[test]
 fn test_client_pin_get_retries() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     let retry = device.get_pin_retries();
     println!("- retries = {:?}", retry);
     assert!(true);
@@ -59,7 +59,7 @@ fn test_make_credential_with_pin_non_rk() {
     let challenge = b"this is challenge".to_vec();
     let pin = "1234";
 
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     let att = device.make_credential(rpid, &challenge, Some(pin)).unwrap();
     println!("Attestation");
     println!("{}", att);
@@ -80,7 +80,7 @@ fn test_make_credential_with_pin_non_rk_exclude_authenticator() {
     let challenge = b"this is challenge".to_vec();
     let pin = "1234";
 
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
 
     let make_credential_args = MakeCredentialArgsBuilder::new(&rpid, &challenge)
         .pin(pin)
@@ -104,7 +104,7 @@ fn test_make_credential_with_pin_non_rk_exclude_authenticator() {
 
 #[test]
 fn test_credential_management_get_creds_metadata() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     match device.is_info_param_enabled(&InfoParam::VersionsFido21Pre) {
         Ok(result) => {
             if !result {
@@ -124,7 +124,7 @@ fn test_credential_management_get_creds_metadata() {
 
 #[test]
 fn test_credential_management_enumerate_rps() {
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
     match device.is_info_param_enabled(&InfoParam::VersionsFido21Pre) {
         Ok(result) => {
             if !result {
@@ -146,7 +146,7 @@ fn test_credential_management_enumerate_rps() {
 fn test_bio_enrollment_get_fingerprint_sensor_info() {
     let mut skip = true;
 
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
 
     match device.is_info_option_enabled(&InfoOption::UserVerificationMgmtPreview) {
         Ok(result) => {
@@ -176,7 +176,7 @@ fn test_bio_enrollment_get_fingerprint_sensor_info() {
 fn test_bio_enrollment_enumerate_enrollments() {
     let mut skip = true;
 
-    let device = FidoKeyHidFactory::create(&Cfg::init()).unwrap();
+    let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
 
     match device.is_info_option_enabled(&InfoOption::UserVerificationMgmtPreview) {
         Ok(result) => {

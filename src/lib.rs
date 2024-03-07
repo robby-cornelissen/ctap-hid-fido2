@@ -1,3 +1,6 @@
+use std::sync::mpsc::Sender;
+use anyhow::anyhow;
+
 pub mod auth_data;
 mod ctapdef;
 mod ctaphid;
@@ -16,12 +19,11 @@ pub mod public_key_credential_parameters;
 pub mod public_key_credential_rp_entity;
 pub mod public_key_credential_user_entity;
 pub mod result;
+
 pub use result::{Error, Result};
 pub mod str_buf;
 pub mod util;
 pub mod verifier;
-
-use anyhow::anyhow;
 
 pub mod fidokey;
 pub use fidokey::FidoKeyHid;
@@ -64,7 +66,7 @@ pub fn get_fidokey_devices() -> Vec<HidInfo> {
 pub struct FidoKeyHidFactory {}
 
 impl FidoKeyHidFactory {
-    pub fn create(cfg: &LibCfg) -> Result<FidoKeyHid> {
+    pub fn create(cfg: &LibCfg, prompt_tx: Option<Sender<String>>) -> Result<FidoKeyHid> {
         let device = {
             let mut devs = get_fidokey_devices();
             if devs.is_empty() {
@@ -77,13 +79,13 @@ impl FidoKeyHidFactory {
             let device = devs.pop().unwrap().param;
 
             let params = vec![device];
-            FidoKeyHid::new(&params, cfg)?
+            FidoKeyHid::new(&params, cfg, prompt_tx)?
         };
         Ok(device)
     }
 
-    pub fn create_by_params(params: &[HidParam], cfg: &LibCfg) -> Result<FidoKeyHid> {
-        FidoKeyHid::new(params, cfg)
+    pub fn create_by_params(params: &[HidParam], cfg: &LibCfg, prompt_tx: Option<Sender<String>>) -> Result<FidoKeyHid> {
+        FidoKeyHid::new(params, cfg, prompt_tx)
     }
 }
 

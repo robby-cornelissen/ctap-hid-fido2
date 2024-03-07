@@ -144,7 +144,7 @@ mod tests {
     #[test]
     fn test_check_version_support() {
         let hid_params = HidParam::get();
-        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
 
         let info = device.get_info().expect("Could not get authenticator info");
 
@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn test_check_extension() {
         let hid_params = HidParam::get();
-        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
 
         let info = device.get_info().expect("Could not get authenticator info");
 
@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn test_get_option() {
         let hid_params = HidParam::get();
-        let device = FidoKeyHid::new(&hid_params, &Cfg::init()).unwrap();
+        let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
 
         let info = device.get_info().expect("Could not get authenticator info");
 

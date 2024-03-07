@@ -297,6 +297,10 @@ fn ctaphid_cbormsg(
                 if st.2 == CTAPHID_KEEPALIVE_STATUS_UP_NEEDED {
                     // could use some renaming here; up_needed_msg or something?
                     if !device.keep_alive_msg.is_empty() {
+                        if device.prompt_tx.is_some() {
+                            // not the cleanest implementation, will panic
+                            device.prompt_tx.as_ref().unwrap().send(device.keep_alive_msg.to_string()).unwrap();
+                        }
                         println!("{}", device.keep_alive_msg);
                     }
                 }

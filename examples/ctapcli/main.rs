@@ -254,7 +254,7 @@ fn main() -> Result<()> {
         }
     }
 
-    let device = FidoKeyHidFactory::create(&cfg)?;
+    let device = FidoKeyHidFactory::create(&cfg, None)?;
 
     if arg.user_presence {
         println!("User Presence Test.\n");
