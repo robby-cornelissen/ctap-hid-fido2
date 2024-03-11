@@ -4,6 +4,7 @@ pub const AUTHENTICATOR_MAKE_CREDENTIAL: u8 = 0x01;
 pub const AUTHENTICATOR_GET_ASSERTION: u8 = 0x02;
 pub const AUTHENTICATOR_GET_INFO: u8 = 0x04;
 pub const AUTHENTICATOR_CLIENT_PIN: u8 = 0x06;
+pub const AUTHENTICATOR_RESET: u8 = 0x07;
 
 // CTAP 2.1
 // 6.7. authenticatorBioEnrollment (0x09)

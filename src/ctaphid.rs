@@ -249,7 +249,7 @@ fn ctaphid_cbormsg(
 
     // initialization_packet
     let request = create_initialization_packet(cid, command, payload);
-    // println!("CTAPHID_CBOR(0) = {}", util::to_hex_str(&request.0));
+    println!("CTAPHID_CBOR(0) = {}", util::to_hex_str(&request.0));
 
     // Write data to device
     let _size = device.write(&request.0).map_err(anyhow::Error::msg)?;
@@ -286,7 +286,7 @@ fn ctaphid_cbormsg(
                 return Err(CtapError::from(0xfe).into());
             }
         };
-        // println!("Read: {:?}", response);
+        println!("Read: {}", util::to_hex_str(&response));
 
         if command != CTAPHID_CBOR && command != CTAPHID_MSG {
             if up_needed_prompt_flag {

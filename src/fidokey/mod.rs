@@ -5,6 +5,7 @@ use std::sync::mpsc::Sender;
 
 // Complex Submodules
 pub mod authenticator_config;
+pub mod authenticator_reset;
 pub mod bio;
 pub mod credential_management;
 pub mod get_assertion;

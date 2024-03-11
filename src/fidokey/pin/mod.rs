@@ -23,7 +23,7 @@ impl FidoKeyHid {
     }
 
     /// Get power cycle state, since CTAP 2.1
-    /// This is very inefficient as the same information is obtained from the PIN retries
+    /// This is very inefficient as at the same information is obtained from the PIN retries
     /// command, but we don't have a good result object to expose all PIN information
     pub fn get_power_cycle_state(&self) -> Result<Option<bool>> {
         let cid = ctaphid::ctaphid_init(self)?;
@@ -50,15 +50,14 @@ impl FidoKeyHid {
         Ok(pin.uv_retries)
     }
 
-    /// This proliferation of set PIN, set new PIN and change PIN commands is confusing
-    /// Set New PIN
+    // Set New PIN
     pub fn set_new_pin(&self, pin: &str) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
         self.set_pin(&cid, pin)?;
         Ok(())
     }
 
-    /// Change PIN
+    // Change PIN
     pub fn change_pin(&self, current_pin: &str, new_pin: &str) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
         client_pin::change_pin(self, &cid, current_pin, new_pin)?;
