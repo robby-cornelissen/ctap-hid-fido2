@@ -1,6 +1,8 @@
+use crate::result::Result;
 use crate::str_buf::StrBuf;
 use hidapi::HidApi;
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 #[derive(Debug, Clone)]
 /// Storage for device related information
@@ -97,7 +99,7 @@ impl HidParam {
 }
 
 pub fn get_hid_devices(usage_page: Option<u16>) -> Vec<HidInfo> {
-    let api = HidApi::new().expect("Failed to create HidAPI instance");
+    let api = hid_api().expect("Failed to get HidAPI instance");
     let mut res = vec![];
 
     let devices = api.device_list();
@@ -143,4 +145,16 @@ pub fn get_hid_devices(usage_page: Option<u16>) -> Vec<HidInfo> {
         }
     }
     res
+}
+
+pub fn hid_api() -> Result<&'static HidApi> {
+    static HID_API: OnceLock<HidApi> = OnceLock::new();
+
+    match HID_API.get() {
+        Some(hid_api) => Ok(hid_api),
+        None => match HidApi::new() {
+            Ok(hid_api) => Ok(HID_API.get_or_init(|| hid_api)),
+            Err(e) => Err(anyhow::anyhow!(e).into())
+        },
+    }
 }

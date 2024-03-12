@@ -1,5 +1,4 @@
-use crate::HidParam;
-use hidapi::HidApi;
+use crate::{hid::hid_api, HidParam};
 use std::ffi::CString;
 use std::sync::mpsc::Sender;
 
@@ -42,7 +41,7 @@ impl FidoKeyHid {
         cfg: &crate::LibCfg,
         prompt_tx: Option<Sender<Option<String>>>,
     ) -> Result<Self> {
-        let api = HidApi::new().expect("Failed to create HidApi instance");
+        let api = hid_api().expect("Failed to get HidApi instance");
         for param in params {
             let path = get_path(&api, param);
             if path.is_none() {
