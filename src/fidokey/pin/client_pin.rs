@@ -13,22 +13,28 @@ use crate::result::Result;
 use anyhow::anyhow;
 
 impl FidoKeyHid {
-    pub fn get_authenticator_key_agreement(&self, cid: &[u8]) -> Result<cose::CoseKey> {
-        let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement)?;
+    pub fn get_authenticator_key_agreement(
+        &self,
+        cid: &[u8],
+        pin_uv_auth_protocol: Option<u32>,
+    ) -> Result<cose::CoseKey> {
+        let send_payload =
+            client_pin_command::create_payload(PinCmd::GetKeyAgreement, pin_uv_auth_protocol)?;
         let response_cbor = ctaphid::ctaphid_cbor(self, cid, &send_payload)?;
         let authenticator_key_agreement =
             client_pin_response::parse_cbor_client_pin_get_keyagreement(&response_cbor)?;
         Ok(authenticator_key_agreement)
     }
 
-    pub fn get_pin_token(&self, cid: &[u8], pin: &str) -> Result<PinToken> {
+    pub fn get_pin_token(&self, cid: &[u8], pin_uv_auth_protocol: Option<u32>, pin: &str) -> Result<PinToken> {
         if !pin.is_empty() {
-            let authenticator_key_agreement = self.get_authenticator_key_agreement(cid)?;
+            let authenticator_key_agreement = self.get_authenticator_key_agreement(cid, pin_uv_auth_protocol)?;
 
             let shared_secret = SharedSecret::new(&authenticator_key_agreement)?;
             let pin_hash_enc = shared_secret.encrypt_pin(pin)?;
 
             let send_payload = client_pin_command::create_payload_get_pin_token(
+                pin_uv_auth_protocol,
                 &shared_secret.public_key,
                 &pin_hash_enc,
             );
@@ -48,14 +54,26 @@ impl FidoKeyHid {
         }
     }
 
-    pub fn get_pinuv_auth_token_with_permission(
+    /* 
+    pub fn get_pin_uv_auth_token(
         &self,
         cid: &[u8],
+        permissions: Permissions,
+        pin: Option<&str>,
+        rp_id: Option<&str>,
+    ) -> Result<PinToken> {
+    }
+    */
+
+    pub fn get_pin_uv_auth_token_with_permissions(
+        &self,
+        cid: &[u8],
+        pin_uv_auth_protocol: Option<u32>,
         pin: &str,
         permissions: Permissions,
     ) -> Result<PinToken> {
         if !pin.is_empty() {
-            let authenticator_key_agreement = self.get_authenticator_key_agreement(cid)?;
+            let authenticator_key_agreement = self.get_authenticator_key_agreement(cid, pin_uv_auth_protocol)?;
 
             // Get pinHashEnc
             // - shared_secret.public_key -> platform KeyAgreement
@@ -65,6 +83,7 @@ impl FidoKeyHid {
             // Get pin token
             let send_payload =
                 client_pin_command::create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
+                    pin_uv_auth_protocol,
                     &shared_secret.public_key,
                     &pin_hash_enc,
                     permissions,
@@ -84,12 +103,12 @@ impl FidoKeyHid {
         }
     }
 
-    pub fn set_pin(&self, cid: &[u8], pin: &str) -> Result<()> {
+    pub fn set_pin(&self, cid: &[u8], pin_uv_auth_protocol: Option<u32>, pin: &str) -> Result<()> {
         if pin.is_empty() {
             return Err(anyhow!("No PIN provided").into());
         }
 
-        let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement)?;
+        let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement, pin_uv_auth_protocol)?;
         let response_cbor = ctaphid::ctaphid_cbor(self, cid, &send_payload)?;
 
         let key_agreement =
@@ -102,6 +121,7 @@ impl FidoKeyHid {
         let pin_auth = create_pin_auth_for_set_pin(&shared_secret, &new_pin_enc)?;
 
         let send_payload = client_pin_command::create_payload_set_pin(
+            pin_uv_auth_protocol,
             &shared_secret.public_key,
             &pin_auth,
             &new_pin_enc,
@@ -173,7 +193,7 @@ fn create_new_pin_enc(shared_secret: &SharedSecret, new_pin: &str) -> Result<Vec
     Ok(new_pin_enc)
 }
 
-pub fn change_pin(device: &FidoKeyHid, cid: &[u8], current_pin: &str, new_pin: &str) -> Result<()> {
+pub fn change_pin(device: &FidoKeyHid, cid: &[u8], pin_uv_auth_protocol: Option<u32>, current_pin: &str, new_pin: &str) -> Result<()> {
     if current_pin.is_empty() {
         return Err(anyhow!("Current PIN not provided").into());
     }
@@ -181,7 +201,7 @@ pub fn change_pin(device: &FidoKeyHid, cid: &[u8], current_pin: &str, new_pin: &
         return Err(anyhow!("New PIN not provided").into());
     }
 
-    let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement)?;
+    let send_payload = client_pin_command::create_payload(PinCmd::GetKeyAgreement, pin_uv_auth_protocol)?;
     let response_cbor = ctaphid::ctaphid_cbor(device, cid, &send_payload)?;
 
     let key_agreement =
@@ -197,6 +217,7 @@ pub fn change_pin(device: &FidoKeyHid, cid: &[u8], current_pin: &str, new_pin: &
         create_pin_auth_for_change_pin(&shared_secret, &new_pin_enc, &current_pin_hash_enc)?;
 
     let send_payload = client_pin_command::create_payload_change_pin(
+        pin_uv_auth_protocol,
         &shared_secret.public_key,
         &pin_auth,
         &new_pin_enc,

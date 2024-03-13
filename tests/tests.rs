@@ -47,7 +47,7 @@ fn test_get_info_u2f() {
 #[test]
 fn test_client_pin_get_retries() {
     let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
-    let retry = device.get_pin_retries();
+    let retry = device.get_pin_retries(None);
     println!("- retries = {:?}", retry);
     assert!(true);
 }

@@ -33,8 +33,9 @@ impl FidoKeyHid {
 
         // get pintoken
         let pin_token = if let Some(pin) = pin {
-            Some(self.get_pinuv_auth_token_with_permission(
+            Some(self.get_pin_uv_auth_token_with_permissions(
                 &cid,
+                None,
                 pin,
                 super::pin::Permissions::LARGE_BLOB_WRITE,
             )?)

@@ -96,10 +96,11 @@ impl FidoKeyHid {
         let pin_token = {
             if let Some(pin) = pin {
                 if self.use_pre_credential_management {
-                    Some(self.get_pin_token(&cid, pin)?)
+                    Some(self.get_pin_token(&cid, None, pin)?)
                 } else {
-                    Some(self.get_pinuv_auth_token_with_permission(
+                    Some(self.get_pin_uv_auth_token_with_permissions(
                         &cid,
+                        None,
                         pin,
                         Permissions::CREDENTIAL_MANAGEMENT,
                     )?)

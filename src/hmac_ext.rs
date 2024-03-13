@@ -26,7 +26,7 @@ impl HmacExt {
         //println!("----------");
         //println!("{}", StrBuf::bufh("salt1", salt1));
 
-        let send_payload = create_payload(PinCmd::GetKeyAgreement)?;
+        let send_payload = create_payload(PinCmd::GetKeyAgreement, None)?;
         let response_cbor = ctaphid::ctaphid_cbor(device, cid, &send_payload)?;
 
         let key_agreement = parse_cbor_client_pin_get_keyagreement(&response_cbor)?;

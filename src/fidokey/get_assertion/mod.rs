@@ -32,7 +32,7 @@ impl FidoKeyHid {
         // pin token
         let pin_token = {
             if let Some(pin) = args.pin {
-                Some(self.get_pin_token(&cid, pin)?)
+                Some(self.get_pin_token(&cid, None, pin)?)
             } else {
                 None
             }

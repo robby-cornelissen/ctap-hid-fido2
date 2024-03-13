@@ -9,10 +9,11 @@ pub use client_pin_response::*;
 
 impl FidoKeyHid {
     /// Get PIN retry count
-    pub fn get_pin_retries(&self) -> Result<u32> {
+    pub fn get_pin_retries(&self, pin_uv_auth_protocol: Option<u32>) -> Result<u32> {
         let cid = ctaphid::ctaphid_init(self)?;
 
-        let send_payload = client_pin_command::create_payload(PinCmd::GetRetries)?;
+        let send_payload =
+            client_pin_command::create_payload(PinCmd::GetRetries, pin_uv_auth_protocol)?;
 
         let response_cbor = ctaphid::ctaphid_cbor(self, &cid, &send_payload)?;
 
@@ -25,10 +26,11 @@ impl FidoKeyHid {
     /// Get power cycle state, since CTAP 2.1
     /// This is very inefficient as at the same information is obtained from the PIN retries
     /// command, but we don't have a good result object to expose all PIN information
-    pub fn get_power_cycle_state(&self) -> Result<Option<bool>> {
+    pub fn get_power_cycle_state(&self, pin_uv_auth_protocol: Option<u32>) -> Result<Option<bool>> {
         let cid = ctaphid::ctaphid_init(self)?;
 
-        let send_payload = client_pin_command::create_payload(PinCmd::GetRetries)?;
+        let send_payload =
+            client_pin_command::create_payload(PinCmd::GetRetries, pin_uv_auth_protocol)?;
 
         let response_cbor = ctaphid::ctaphid_cbor(self, &cid, &send_payload)?;
 
@@ -38,10 +40,11 @@ impl FidoKeyHid {
     }
 
     /// Get UV retry count, since CTAP 2.1
-    pub fn get_uv_retries(&self) -> Result<Option<u32>> {
+    pub fn get_uv_retries(&self, pin_uv_auth_protocol: Option<u32>) -> Result<Option<u32>> {
         let cid = ctaphid::ctaphid_init(self)?;
 
-        let send_payload = client_pin_command::create_payload(PinCmd::GetUVRetries)?;
+        let send_payload =
+            client_pin_command::create_payload(PinCmd::GetUVRetries, pin_uv_auth_protocol)?;
 
         let response_cbor = ctaphid::ctaphid_cbor(self, &cid, &send_payload)?;
 
@@ -51,22 +54,27 @@ impl FidoKeyHid {
     }
 
     // Set New PIN
-    pub fn set_new_pin(&self, pin: &str) -> Result<()> {
+    pub fn set_new_pin(&self, pin_uv_auth_protocol: Option<u32>, pin: &str) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
-        self.set_pin(&cid, pin)?;
+        self.set_pin(&cid, pin_uv_auth_protocol, pin)?;
         Ok(())
     }
 
     // Change PIN
-    pub fn change_pin(&self, current_pin: &str, new_pin: &str) -> Result<()> {
+    pub fn change_pin(
+        &self,
+        pin_uv_auth_protocol: Option<u32>,
+        current_pin: &str,
+        new_pin: &str,
+    ) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
-        client_pin::change_pin(self, &cid, current_pin, new_pin)?;
+        client_pin::change_pin(self, &cid, pin_uv_auth_protocol, current_pin, new_pin)?;
         Ok(())
     }
 
     // Have yet to find an appropriate command to test a PIN in the spec;
     // For now, we just try to get any PIN token
-    pub fn get_any_pin_token(&self, pin: &str) -> Result<PinToken> {
+    pub fn get_any_pin_token(&self, pin_uv_auth_protocol: Option<u32>, pin: &str) -> Result<PinToken> {
         let cid = ctaphid::ctaphid_init(self)?;
         let info = self.get_info()?;
 
@@ -74,11 +82,25 @@ impl FidoKeyHid {
             // This permission is very much chosen at random and not at all fool-proof
             // It might be better to request an undefined permission and get a token with no permissions
             // See https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#getPinUvAuthTokenUsingPinWithPermissions
-            true => {
-                self.get_pinuv_auth_token_with_permission(&cid, pin, Permissions::LARGE_BLOB_WRITE)
-            }
-            false => self.get_pin_token(&cid, pin),
+            // Another option would be to issue a change PIN command with two identical PINs
+            true => self.get_pin_uv_auth_token_with_permissions(
+                &cid,
+                pin_uv_auth_protocol,
+                pin,
+                Permissions::LARGE_BLOB_WRITE,
+            ),
+            false => self.get_pin_token(&cid, pin_uv_auth_protocol, pin),
         }
+    }
+
+    // New stuff here
+    pub fn get_auth_token(
+        &self,
+        permissions: Permissions,
+        pin: Option<&str>,
+        rp_id: Option<&str>,
+    ) -> Result<()> {
+        Ok(())
     }
 }
 
@@ -97,7 +119,7 @@ mod tests {
         let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
         let cid = ctaphid::ctaphid_init(&device).unwrap();
 
-        let send_payload = create_payload(PinCmd::GetKeyAgreement).unwrap();
+        let send_payload = create_payload(PinCmd::GetKeyAgreement, None).unwrap();
         let response_cbor = ctaphid::ctaphid_cbor(&device, &cid, &send_payload).unwrap();
 
         let key_agreement =
@@ -115,7 +137,7 @@ mod tests {
         hid_cfg.enable_log = true;
         let device = FidoKeyHid::new(&hid_params, &hid_cfg, None).unwrap();
 
-        match device.get_any_pin_token("0000") {
+        match device.get_any_pin_token(None, "0000") {
             Ok(_) => println!("Got PIN token"),
             Err(e) => println!("{}", e),
         }

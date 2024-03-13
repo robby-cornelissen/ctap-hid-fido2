@@ -215,9 +215,14 @@ impl FidoKeyHid {
         let pin_token = {
             if let Some(pin) = pin {
                 if self.use_pre_bio_enrollment {
-                    Some(self.get_pin_token(&cid, pin)?)
+                    Some(self.get_pin_token(&cid, None, pin)?)
                 } else {
-                    Some(self.get_pinuv_auth_token_with_permission(&cid, pin, Permissions::BIO_ENROLLMENT)?)
+                    Some(self.get_pin_uv_auth_token_with_permissions(
+                        &cid,
+                        None,
+                        pin,
+                        Permissions::BIO_ENROLLMENT,
+                    )?)
                 }
             } else {
                 None

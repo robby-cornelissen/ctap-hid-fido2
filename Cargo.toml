@@ -1,6 +1,6 @@
 [package]
 name = "ctap-hid-fido2"
-version = "3.5.0"
+version = "0.1.0"
 authors = ["Robby Cornelissen", "gebo <35388172+gebogebogebo@users.noreply.github.com>"]
 edition = "2021"
 
@@ -44,21 +44,3 @@ rpassword = "7.0"
 # Used in ctapcli
 [target.'cfg(not(linux))'.dev-dependencies]
 clipboard = "0.5.0"
-
-[[example]]
-name = "ctapcli"
-
-[[example]]
-name = "get-info"
-
-[[example]]
-name = "reg-auth"
-
-[[example]]
-name = "test-with-pin-non-rk"
-
-[[example]]
-name = "test-with-pin-rk"
-
-[[example]]
-name = "wink"

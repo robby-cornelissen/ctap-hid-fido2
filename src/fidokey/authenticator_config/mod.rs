@@ -34,8 +34,12 @@ impl FidoKeyHid {
         let cid = ctaphid::ctaphid_init(self)?;
 
         // get pintoken
-        let pin_token =
-            self.get_pinuv_auth_token_with_permission(&cid, pin, Permissions::AUTHENTICATOR_CONFIGURATION)?;
+        let pin_token = self.get_pin_uv_auth_token_with_permissions(
+            &cid,
+            None,
+            pin,
+            Permissions::AUTHENTICATOR_CONFIGURATION,
+        )?;
 
         let send_payload = authenticator_config_command::create_payload(pin_token, sub_command)?;
         let _response_cbor = ctaphid::ctaphid_cbor(self, &cid, &send_payload)?;
