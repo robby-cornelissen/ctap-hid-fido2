@@ -2,7 +2,7 @@ use crate::result::Result;
 use crate::str_buf::StrBuf;
 use hidapi::HidApi;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{Mutex, MutexGuard, OnceLock};
 
 #[derive(Debug, Clone)]
 /// Storage for device related information
@@ -147,13 +147,18 @@ pub fn get_hid_devices(usage_page: Option<u16>) -> Vec<HidInfo> {
     res
 }
 
-pub fn hid_api() -> Result<&'static HidApi> {
-    static HID_API: OnceLock<HidApi> = OnceLock::new();
+pub fn hid_api() -> Result<MutexGuard<'static, HidApi>> {
+    static HID_API: OnceLock<Mutex<HidApi>> = OnceLock::new();
 
     match HID_API.get() {
-        Some(hid_api) => Ok(hid_api),
+        Some(hid_api) => {
+            let mut api = hid_api.lock().unwrap();
+            api.refresh_devices().map_err(|e| anyhow::anyhow!(e))?;
+
+            Ok(api)
+        },
         None => match HidApi::new() {
-            Ok(hid_api) => Ok(HID_API.get_or_init(|| hid_api)),
+            Ok(hid_api) => Ok(HID_API.get_or_init(|| Mutex::new(hid_api)).lock().unwrap()),
             Err(e) => Err(anyhow::anyhow!(e).into())
         },
     }
