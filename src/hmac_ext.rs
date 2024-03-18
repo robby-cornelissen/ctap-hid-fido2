@@ -2,6 +2,7 @@ use crate::ctaphid;
 use crate::encrypt::enc_aes256_cbc;
 use crate::encrypt::enc_hmac_sha_256;
 use crate::encrypt::shared_secret::SharedSecret;
+use crate::fidokey::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
 use crate::fidokey::pin::{
     create_payload, parse_cbor_client_pin_get_keyagreement, SubCommand as PinCmd,
 };
@@ -26,7 +27,7 @@ impl HmacExt {
         //println!("----------");
         //println!("{}", StrBuf::bufh("salt1", salt1));
 
-        let send_payload = create_payload(PinCmd::GetKeyAgreement, None)?;
+        let send_payload = create_payload(PinCmd::GetKeyAgreement, DEFAULT_PIN_UV_AUTH_PROTOCOL)?;
         let response_cbor = ctaphid::ctaphid_cbor(device, cid, &send_payload)?;
 
         let key_agreement = parse_cbor_client_pin_get_keyagreement(&response_cbor)?;

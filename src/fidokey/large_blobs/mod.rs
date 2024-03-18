@@ -1,8 +1,10 @@
 pub mod large_blobs_command;
 pub mod large_blobs_params;
 pub mod large_blobs_response;
+use super::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
 use super::FidoKeyHid;
 use crate::ctaphid;
+use crate::pintoken::Permissions;
 use crate::result::Result;
 use large_blobs_params::LargeBlobData;
 
@@ -22,6 +24,8 @@ impl FidoKeyHid {
         self.large_blobs(pin, offset, None, Some(write_datas))
     }
 
+    // This, as well as the underlying methods need to be reviewed
+    // in regards to the handling of the PIN token.
     fn large_blobs(
         &self,
         pin: Option<&str>,
@@ -35,9 +39,9 @@ impl FidoKeyHid {
         let pin_token = if let Some(pin) = pin {
             Some(self.get_pin_uv_auth_token_with_permissions(
                 &cid,
-                None,
+                DEFAULT_PIN_UV_AUTH_PROTOCOL,
                 pin,
-                super::pin::Permissions::LARGE_BLOB_WRITE,
+                Permissions::LARGE_BLOB_WRITE,
             )?)
         } else {
             None

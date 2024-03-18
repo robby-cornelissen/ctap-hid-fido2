@@ -1,9 +1,10 @@
 pub mod credential_management_command;
 pub mod credential_management_params;
 pub mod credential_management_response;
-use super::{pin::Permissions, FidoKeyHid};
+use super::{pin::DEFAULT_PIN_UV_AUTH_PROTOCOL, FidoKeyHid};
 use crate::{
-    ctaphid, public_key_credential_descriptor::PublicKeyCredentialDescriptor,
+    ctaphid, pintoken::Permissions,
+    public_key_credential_descriptor::PublicKeyCredentialDescriptor,
     public_key_credential_user_entity::PublicKeyCredentialUserEntity, result::Result, util,
 };
 use {
@@ -85,6 +86,7 @@ impl FidoKeyHid {
         Ok(())
     }
 
+    // This needs some review, especially the use of the PIN token
     fn credential_management(
         &self,
         pin: Option<&str>,
@@ -92,17 +94,17 @@ impl FidoKeyHid {
     ) -> Result<CredentialManagementData> {
         let cid = ctaphid::ctaphid_init(self)?;
 
-        // pin token
         let pin_token = {
             if let Some(pin) = pin {
                 if self.use_pre_credential_management {
-                    Some(self.get_pin_token(&cid, None, pin)?)
+                    Some(self.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, pin)?)
                 } else {
-                    Some(self.get_pin_uv_auth_token_with_permissions(
+                    Some(self.get_pin_uv_auth_token(
                         &cid,
-                        None,
-                        pin,
+                        DEFAULT_PIN_UV_AUTH_PROTOCOL,
+                        Some(pin),
                         Permissions::CREDENTIAL_MANAGEMENT,
+                        None,
                     )?)
                 }
             } else {

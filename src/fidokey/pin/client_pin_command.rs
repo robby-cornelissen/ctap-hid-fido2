@@ -1,5 +1,6 @@
 use crate::ctapdef;
 use crate::encrypt::cose;
+use crate::pintoken::Permissions;
 use crate::result::Result;
 use serde_cbor::Value;
 use std::collections::BTreeMap;
@@ -15,35 +16,22 @@ pub enum SubCommand {
     GetPinUvAuthTokenUsingPinWithPermissions = 0x09,
 }
 
-const DEFAULT_PIN_UV_AUTH_PROTOCOL: u32 = 1;
 
-bitflags::bitflags! {
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    pub struct Permissions: u8 {
-        const MAKE_CREDENTIAL = 0x01;
-        const GET_ASSERTION = 0x02;
-        const CREDENTIAL_MANAGEMENT = 0x04;
-        const BIO_ENROLLMENT = 0x08;
-        const LARGE_BLOB_WRITE = 0x10;
-        const AUTHENTICATOR_CONFIGURATION = 0x20;
-    }
-}
-
-fn create_payload_get_uv_retries(pin_uv_auth_protocol: Option<u32>) -> Vec<u8> {
+fn create_payload_get_uv_retries(pin_uv_auth_protocol: u32) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_uv_auth_protocol(&mut map, pin_uv_auth_protocol);
     insert_sub_command(&mut map, SubCommand::GetUVRetries);
     to_payload(map)
 }
 
-fn create_payload_get_retries(pin_uv_auth_protocol: Option<u32>) -> Vec<u8> {
+fn create_payload_get_retries(pin_uv_auth_protocol: u32) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_uv_auth_protocol(&mut map, pin_uv_auth_protocol);
     insert_sub_command(&mut map, SubCommand::GetRetries);
     to_payload(map)
 }
 
-fn create_payload_get_keyagreement(pin_uv_auth_protocol: Option<u32>) -> Vec<u8> {
+fn create_payload_get_keyagreement(pin_uv_auth_protocol: u32) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_uv_auth_protocol(&mut map, pin_uv_auth_protocol);
     insert_sub_command(&mut map, SubCommand::GetKeyAgreement);
@@ -51,7 +39,7 @@ fn create_payload_get_keyagreement(pin_uv_auth_protocol: Option<u32>) -> Vec<u8>
 }
 
 pub fn create_payload_get_pin_token(
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
     key_agreement: &cose::CoseKey,
     pin_hash_enc: &[u8],
 ) -> Vec<u8> {
@@ -64,7 +52,7 @@ pub fn create_payload_get_pin_token(
 }
 
 pub fn create_payload_set_pin(
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
     key_agreement: &cose::CoseKey,
     pin_auth: &[u8],
     new_pin_enc: &[u8],
@@ -79,7 +67,7 @@ pub fn create_payload_set_pin(
 }
 
 pub fn create_payload_change_pin(
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
     key_agreement: &cose::CoseKey,
     pin_auth: &[u8],
     new_pin_enc: &[u8],
@@ -96,10 +84,11 @@ pub fn create_payload_change_pin(
 }
 
 pub fn create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
     key_agreement: &cose::CoseKey,
     pin_hash_enc: &[u8],
     permissions: Permissions,
+    rp_id: Option<&str>,
 ) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_uv_auth_protocol(&mut map, pin_uv_auth_protocol);
@@ -117,11 +106,17 @@ pub fn create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
     let value = Value::Integer(permissions.bits() as i128);
     map.insert(Value::Integer(0x09), value);
 
+    // rpid(0x0A) - String
+    if let Some(rp_id) = rp_id {
+        let value = Value::Text(rp_id.to_string());
+        map.insert(Value::Integer(0x0A), value);
+    }
+
     to_payload(map)
 }
 
 pub fn create_payload_get_pin_uv_auth_token_using_uv_with_permissions(
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
     key_agreement: &cose::CoseKey,
     permissions: Permissions,
     rp_id: Option<&str>,
@@ -156,9 +151,12 @@ fn to_payload(map: BTreeMap<Value, Value>) -> Vec<u8> {
 }
 
 // 0x01 : pin_protocol
-fn insert_pin_uv_auth_protocol(map: &mut BTreeMap<Value, Value>, protocol: Option<u32>) {
-    let pin_prot = Value::Integer(protocol.unwrap_or(DEFAULT_PIN_UV_AUTH_PROTOCOL).into());
-    map.insert(Value::Integer(0x01), pin_prot);
+fn insert_pin_uv_auth_protocol(
+    map: &mut BTreeMap<Value, Value>,
+    pin_uv_auth_protocol: u32,
+) {
+    let pin_uv_auth_protocol = Value::Integer(pin_uv_auth_protocol.into());
+    map.insert(Value::Integer(0x01), pin_uv_auth_protocol);
 }
 
 // 0x02 : sub_command
@@ -212,7 +210,7 @@ fn insert_pin_hash_enc(map: &mut BTreeMap<Value, Value>, pin_hash_enc: &[u8]) {
 
 pub fn create_payload(
     sub_command: SubCommand,
-    pin_uv_auth_protocol: Option<u32>,
+    pin_uv_auth_protocol: u32,
 ) -> Result<Vec<u8>> {
     match sub_command {
         SubCommand::GetRetries => Ok(create_payload_get_retries(pin_uv_auth_protocol)),

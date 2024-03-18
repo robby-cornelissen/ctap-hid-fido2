@@ -1,8 +1,10 @@
 mod authenticator_config_command;
 
-use super::{pin::Permissions, FidoKeyHid};
+use super::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
+use super::FidoKeyHid;
 
 use crate::ctaphid;
+use crate::pintoken::Permissions;
 use crate::result::Result;
 
 use authenticator_config_command::SubCommand;
@@ -24,21 +26,16 @@ impl FidoKeyHid {
         self.config(pin, SubCommand::ForceChangePin)
     }
 
+    // needs to be reworked in regards to the auth token
     fn config(&self, pin: Option<&str>, sub_command: SubCommand) -> Result<()> {
-        let pin = if let Some(v) = pin {
-            v
-        } else {
-            return Err(anyhow::anyhow!("need PIN.").into());
-        };
-
         let cid = ctaphid::ctaphid_init(self)?;
 
-        // get pintoken
-        let pin_token = self.get_pin_uv_auth_token_with_permissions(
+        let pin_token = self.get_pin_uv_auth_token(
             &cid,
-            None,
+            DEFAULT_PIN_UV_AUTH_PROTOCOL,
             pin,
             Permissions::AUTHENTICATOR_CONFIGURATION,
+            None,
         )?;
 
         let send_payload = authenticator_config_command::create_payload(pin_token, sub_command)?;

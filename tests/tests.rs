@@ -2,6 +2,7 @@
 // cargo test -- --test-threads=1
 //
 
+use ctap_hid_fido2::fidokey::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
 use ctap_hid_fido2::*;
 use fidokey::get_info::{InfoOption, InfoParam};
 use fidokey::MakeCredentialArgsBuilder;
@@ -47,7 +48,7 @@ fn test_get_info_u2f() {
 #[test]
 fn test_client_pin_get_retries() {
     let device = FidoKeyHidFactory::create(&Cfg::init(), None).unwrap();
-    let retry = device.get_pin_retries(None);
+    let retry = device.get_pin_retries(DEFAULT_PIN_UV_AUTH_PROTOCOL);
     println!("- retries = {:?}", retry);
     assert!(true);
 }

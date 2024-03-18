@@ -1,13 +1,15 @@
 mod bio_enrollment_command;
 mod bio_enrollment_params;
 mod bio_enrollment_response;
-use crate::pintoken::PinToken;
+use crate::pintoken::{Permissions, PinToken};
 use crate::result::Result;
 use crate::util;
+use crate::FidoKeyHid;
 use crate::{ctapdef, ctaphid};
-use crate::{fidokey::pin::Permissions, FidoKeyHid};
 pub use bio_enrollment_command::SubCommand as BioCmd;
 pub use bio_enrollment_params::*;
+
+use super::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
 
 impl FidoKeyHid {
     /// BioEnrollment - getFingerprintSensorInfo (CTAP 2.1-PRE)
@@ -207,21 +209,21 @@ impl FidoKeyHid {
         Ok(ret)
     }
 
+    // This needs some review, especially the use of the PIN token
     fn bio_enrollment_init(&self, pin: Option<&str>) -> Result<([u8; 4], Option<PinToken>)> {
-        // init
         let cid = ctaphid::ctaphid_init(self)?;
 
-        // pin token
         let pin_token = {
             if let Some(pin) = pin {
                 if self.use_pre_bio_enrollment {
-                    Some(self.get_pin_token(&cid, None, pin)?)
+                    Some(self.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, pin)?)
                 } else {
-                    Some(self.get_pin_uv_auth_token_with_permissions(
+                    Some(self.get_pin_uv_auth_token(
                         &cid,
-                        None,
-                        pin,
+                        DEFAULT_PIN_UV_AUTH_PROTOCOL,
+                        Some(pin),
                         Permissions::BIO_ENROLLMENT,
+                        None,
                     )?)
                 }
             } else {

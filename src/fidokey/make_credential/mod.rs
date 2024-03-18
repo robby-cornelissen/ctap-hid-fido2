@@ -2,7 +2,7 @@ pub mod make_credential_command;
 pub mod make_credential_params;
 pub mod make_credential_response;
 use super::{
-    credential_management::credential_management_params::CredentialProtectionPolicy, FidoKeyHid,
+    credential_management::credential_management_params::CredentialProtectionPolicy, pin::DEFAULT_PIN_UV_AUTH_PROTOCOL, FidoKeyHid
 };
 use crate::{
     ctaphid, encrypt::enc_hmac_sha_256,
@@ -58,7 +58,7 @@ impl FidoKeyHid {
             // needs to be provided to this function
             if let Some(pin) = args.pin {
                 if !pin.is_empty() {
-                    let pin_token = self.get_pin_token(&cid, None, pin)?;
+                    let pin_token = self.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, pin)?;
                     let sig =
                         enc_hmac_sha_256::authenticate(&pin_token.key, &params.client_data_hash);
                     params.pin_auth = sig[0..16].to_vec();

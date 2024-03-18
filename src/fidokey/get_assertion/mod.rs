@@ -7,6 +7,8 @@ use crate::result::Result;
 use get_assertion_params::{Assertion, Extension as Gext, GetAssertionArgs};
 pub use get_assertion_params::{Extension, GetAssertionArgsBuilder};
 
+use super::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
+
 impl FidoKeyHid {
     /// Create a new assertion manually specifying the args using GetAssertionArgs
     pub fn get_assertion_with_args(&self, args: &GetAssertionArgs) -> Result<Vec<Assertion>> {
@@ -30,9 +32,10 @@ impl FidoKeyHid {
         let hmac_ext = create_hmacext(self, &cid, extensions)?;
 
         // pin token
+        // needs to be reworked to get a proper auth token
         let pin_token = {
             if let Some(pin) = args.pin {
-                Some(self.get_pin_token(&cid, None, pin)?)
+                Some(self.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, pin)?)
             } else {
                 None
             }
