@@ -6,7 +6,6 @@ use std::convert::TryFrom;
 use std::fmt;
 use strum_macros::AsRefStr;
 
-/// Assertion Object
 #[derive(Debug, Default, Clone)]
 pub struct Assertion {
     pub rpid_hash: Vec<u8>,
@@ -22,6 +21,7 @@ pub struct Assertion {
     pub user_selected: bool,
 }
 
+// TODO probably remove
 impl fmt::Display for Assertion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(42);
@@ -61,7 +61,15 @@ impl Extension {
         Extension::HmacSecret(Some(<[u8; 32]>::try_from(hasher.as_ref()).unwrap()))
     }
 }
+pub struct GetAssertionArgsT {
+    pub rp_id: String,
+    pub challenge: Vec<u8>,
+    pub credential_ids: Vec<Vec<u8>>,
+    pub uv: Option<bool>,
+    pub extensions: Option<Vec<Extension>>,
+}
 
+// TODO remove
 #[derive(Debug)]
 pub struct GetAssertionArgs<'a> {
     pub rpid: String,
@@ -71,12 +79,30 @@ pub struct GetAssertionArgs<'a> {
     pub uv: Option<bool>,
     pub extensions: Option<Vec<Extension>>,
 }
+
+impl GetAssertionArgsT {
+    pub fn builder() -> GetAssertionArgsBuilderT {
+        GetAssertionArgsBuilderT::default()
+    }
+}
+
+// TODO remove
 impl<'a> GetAssertionArgs<'a> {
     pub fn builder() -> GetAssertionArgsBuilder<'a> {
         GetAssertionArgsBuilder::default()
     }
 }
 
+#[derive(Default)]
+pub struct GetAssertionArgsBuilderT {
+    rp_id: String,
+    challenge: Vec<u8>,
+    credential_ids: Vec<Vec<u8>>,
+    uv: Option<bool>,
+    extensions: Option<Vec<Extension>>,
+}
+
+// TODO remove
 #[derive(Default)]
 pub struct GetAssertionArgsBuilder<'a> {
     rpid: String,
@@ -86,6 +112,49 @@ pub struct GetAssertionArgsBuilder<'a> {
     uv: Option<bool>,
     extensions: Option<Vec<Extension>>,
 }
+
+impl GetAssertionArgsBuilderT {
+    pub fn new(rp_id: &str, challenge: &[u8]) -> Self {
+        Self {
+            uv: Some(true), // TODO need to check this
+            rp_id: String::from(rp_id),
+            challenge: challenge.to_vec(),
+            ..Default::default()
+        }
+    }
+
+    pub fn without_pin_and_uv(mut self) -> Self {
+        self.uv = None;
+        self
+    }
+
+    pub fn extensions(mut self, extensions: &[Extension]) -> Self {
+        self.extensions = Some(extensions.to_vec());
+        self
+    }
+
+    pub fn credential_id(mut self, credential_id: &[u8]) -> Self {
+        self.credential_ids.clear();
+        self.add_credential_id(credential_id)
+    }
+
+    pub fn add_credential_id(mut self, credential_id: &[u8]) -> Self {
+        self.credential_ids.push(credential_id.to_vec());
+        self
+    }
+
+    pub fn build(self) -> GetAssertionArgsT {
+        GetAssertionArgsT {
+            rp_id: self.rp_id,
+            challenge: self.challenge,
+            credential_ids: self.credential_ids,
+            uv: self.uv,
+            extensions: self.extensions,
+        }
+    }
+}
+
+// TODO remove
 impl<'a> GetAssertionArgsBuilder<'a> {
     pub fn new(rpid: &str, challenge: &[u8]) -> GetAssertionArgsBuilder<'a> {
         GetAssertionArgsBuilder::<'_> {

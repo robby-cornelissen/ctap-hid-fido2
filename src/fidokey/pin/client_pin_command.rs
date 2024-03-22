@@ -16,7 +16,6 @@ pub enum SubCommand {
     GetPinUvAuthTokenUsingPinWithPermissions = 0x09,
 }
 
-
 fn create_payload_get_uv_retries(pin_uv_auth_protocol: u32) -> Vec<u8> {
     let mut map = BTreeMap::new();
     insert_pin_uv_auth_protocol(&mut map, pin_uv_auth_protocol);

@@ -29,6 +29,7 @@ pub struct Attestation {
     pub attstmt_x5c: Vec<Vec<u8>>,
 }
 
+// TODO probably remove
 impl fmt::Display for Attestation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(42);
@@ -88,6 +89,19 @@ impl std::default::Default for CredentialSupportedKeyType {
     }
 }
 
+pub struct MakeCredentialArgsT {
+    pub rpid: String,
+    pub challenge: Vec<u8>,
+    pub key_types: Vec<CredentialSupportedKeyType>,
+    pub uv: Option<bool>,
+    pub exclude_list: Vec<Vec<u8>>,
+    pub user_entity: Option<PublicKeyCredentialUserEntity>,
+    pub rp_entity: Option<PublicKeyCredentialRpEntity>,
+    pub rk: Option<bool>,
+    pub extensions: Option<Vec<Mext>>,
+}
+
+// TODO remove
 #[derive(Debug)]
 pub struct MakeCredentialArgs<'a> {
     pub rpid: String,
@@ -101,12 +115,27 @@ pub struct MakeCredentialArgs<'a> {
     pub rk: Option<bool>,
     pub extensions: Option<Vec<Mext>>,
 }
+
 impl<'a> MakeCredentialArgs<'a> {
     pub fn builder() -> MakeCredentialArgsBuilder<'a> {
         MakeCredentialArgsBuilder::default()
     }
 }
 
+#[derive(Default)]
+pub struct MakeCredentialArgsBuilderT<> {
+    rpid: String,
+    challenge: Vec<u8>,
+    key_types: Vec<CredentialSupportedKeyType>,
+    uv: Option<bool>,
+    exclude_list: Vec<Vec<u8>>,
+    user_entity: Option<PublicKeyCredentialUserEntity>,
+    rp_entity: Option<PublicKeyCredentialRpEntity>,
+    rk: Option<bool>,
+    extensions: Option<Vec<Mext>>,
+}
+
+// TODO remove
 #[derive(Default)]
 pub struct MakeCredentialArgsBuilder<'a> {
     rpid: String,
@@ -121,6 +150,77 @@ pub struct MakeCredentialArgsBuilder<'a> {
     extensions: Option<Vec<Mext>>,
 }
 
+impl<'a> MakeCredentialArgsBuilderT {
+    pub fn new(rpid: &str, challenge: &[u8]) -> Self {
+        Self {
+            uv: Some(true), // TODO look into this
+            rpid: String::from(rpid),
+            challenge: challenge.to_vec(),
+            ..Default::default()
+        }
+    }
+
+    /// Adds a credential_id to the excludeList, preventing further credentials being created on
+    /// the same authenticator
+    pub fn exclude_authenticator(mut self, credential_id: &[u8]) -> Self {
+        self.exclude_list.push(credential_id.to_vec());
+        self
+    }
+
+    pub fn key_type(
+        mut self,
+        key_type: CredentialSupportedKeyType,
+    ) -> Self {
+        self.key_types.push(key_type);
+        self
+    }
+
+    pub fn extensions(mut self, extensions: &[Mext]) -> Self {
+        self.extensions = Some(extensions.to_vec());
+        self
+    }
+
+    pub fn user_entity(
+        mut self,
+        user_entity: &PublicKeyCredentialUserEntity,
+    ) -> Self {
+        self.user_entity = Some(user_entity.clone());
+        self
+    }
+
+    // There's some additional work to be done here because the ID of the RP
+    // entity might conflict with the one already set on the builder. Probably
+    // should favor refactoring to require the RP entity instead of the RP ID
+    // on the builder's constructor.
+    pub fn rp_entity(
+        mut self,
+        rp_entity: &PublicKeyCredentialRpEntity,
+    ) -> Self {
+        self.rp_entity = Some(rp_entity.clone());
+        self
+    }
+
+    pub fn resident_key(mut self) -> Self {
+        self.rk = Some(true);
+        self
+    }
+
+    pub fn build(self) -> MakeCredentialArgsT {
+        MakeCredentialArgsT {
+            rpid: self.rpid,
+            challenge: self.challenge,
+            key_types: self.key_types,
+            uv: self.uv,
+            exclude_list: self.exclude_list,
+            user_entity: self.user_entity,
+            rp_entity: self.rp_entity,
+            rk: self.rk,
+            extensions: self.extensions,
+        }
+    }
+}
+
+// TODO remove
 impl<'a> MakeCredentialArgsBuilder<'a> {
     pub fn new(rpid: &str, challenge: &[u8]) -> MakeCredentialArgsBuilder<'a> {
         MakeCredentialArgsBuilder::<'_> {

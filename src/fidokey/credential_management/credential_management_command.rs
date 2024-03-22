@@ -2,6 +2,7 @@ use super::super::sub_command_base::SubCommandBase;
 use crate::public_key_credential_descriptor::PublicKeyCredentialDescriptor;
 use crate::public_key_credential_user_entity::PublicKeyCredentialUserEntity;
 use crate::result::Result;
+use crate::token::Token;
 use crate::{ctapdef, encrypt::enc_hmac_sha_256, pintoken};
 use serde_cbor::{to_vec, Value};
 use std::collections::BTreeMap;
@@ -36,6 +37,71 @@ impl SubCommandBase for SubCommand {
     }
 }
 
+pub fn create_payload_t(
+    token: &Token,
+    sub_command: SubCommand,
+    use_pre_credential_management: bool,
+) -> Result<Vec<u8>> {
+    let mut map = BTreeMap::new();
+
+    // subCommand(0x01)
+    let sub_cmd = Value::Integer(sub_command.id()? as i128);
+    map.insert(Value::Integer(0x01), sub_cmd);
+
+    // subCommandParams (0x02): Map containing following parameters
+    let mut sub_command_params_cbor = Vec::new();
+    if sub_command.has_param() {
+        let param = match sub_command {
+            SubCommand::EnumerateCredentialsBegin(ref rpid_hash)
+            | SubCommand::EnumerateCredentialsGetNextCredential(ref rpid_hash) => {
+                // rpIDHash (0x01): RPID SHA-256 hash.
+                Some(create_rpid_hash(rpid_hash))
+            }
+            SubCommand::UpdateUserInformation(ref pkcd, ref pkcue) => {
+                Some(create_public_key_credential_descriptor_pend(pkcd, pkcue))
+            }
+            SubCommand::DeleteCredential(ref pkcd) => {
+                // credentialId (0x02): PublicKeyCredentialDescriptor of the credential to be deleted or updated.
+                Some(create_public_key_credential_descriptor(pkcd))
+            }
+            _ => None,
+        };
+        if let Some(param) = param {
+            map.insert(Value::Integer(0x02), param.clone());
+            sub_command_params_cbor = to_vec(&param).map_err(anyhow::Error::new)?;
+        }
+    }
+
+    // pinProtocol(0x03)
+    map.insert(Value::Integer(0x03), Value::Integer(token.protocol.into()));
+
+    // pinUvAuthParam (0x04):
+    // - authenticate(pinUvAuthToken, getCredsMetadata (0x01)).
+    // - authenticate(pinUvAuthToken, enumerateCredentialsBegin (0x04) || subCommandParams).
+    // -- First 16 bytes of HMAC-SHA-256 of contents using pinUvAuthToken.
+    let mut message = vec![sub_command.id()?];
+    message.append(&mut sub_command_params_cbor.to_vec());
+
+    let sig = enc_hmac_sha_256::authenticate(&token.key, &message);
+    let pin_uv_auth_param = sig[0..16].to_vec();
+
+    map.insert(Value::Integer(0x04), Value::Bytes(pin_uv_auth_param));
+
+    // create cbor
+    let cbor = Value::Map(map);
+
+    // create payload
+    let mut payload = if use_pre_credential_management {
+        [ctapdef::AUTHENTICATOR_CREDENTIAL_MANAGEMENT_P].to_vec()
+    } else {
+        [ctapdef::AUTHENTICATOR_CREDENTIAL_MANAGEMENT].to_vec()
+    };
+    payload.append(&mut to_vec(&cbor).map_err(anyhow::Error::new)?);
+
+    Ok(payload)
+}
+
+// TODO remove
 pub fn create_payload(
     pin_token: Option<pintoken::PinToken>,
     sub_command: SubCommand,

@@ -7,6 +7,7 @@ pub struct LargeBlobData {
     pub hash: Vec<u8>,
 }
 
+// TODO probably remove
 impl fmt::Display for LargeBlobData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut strbuf = StrBuf::new(33);

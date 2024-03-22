@@ -22,6 +22,7 @@ pub mod result;
 
 pub use result::{Error, Result};
 pub mod str_buf;
+pub mod token;
 pub mod util;
 pub mod verifier;
 
