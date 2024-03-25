@@ -1,13 +1,16 @@
+// TODO remove
 pub struct PinToken {
     pub key: Vec<u8>,
 }
 
+// TODO remove
 impl PinToken {
     pub fn new(data: &[u8]) -> PinToken {
         PinToken { key: data.to_vec() }
     }
 }
 
+// TODO remove
 bitflags::bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Permissions: u8 {

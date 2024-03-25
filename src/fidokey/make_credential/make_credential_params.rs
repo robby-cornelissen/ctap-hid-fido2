@@ -153,7 +153,7 @@ pub struct MakeCredentialArgsBuilder<'a> {
 impl<'a> MakeCredentialArgsBuilderT {
     pub fn new(rpid: &str, challenge: &[u8]) -> Self {
         Self {
-            uv: Some(true), // TODO look into this
+            uv: None,
             rpid: String::from(rpid),
             challenge: challenge.to_vec(),
             ..Default::default()

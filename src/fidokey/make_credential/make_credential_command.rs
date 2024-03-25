@@ -16,6 +16,8 @@ pub struct ParamsT {
     pub user_display_name: String,
     pub exclude_list: Vec<Vec<u8>>,
     pub option_rk: bool,
+    // TODO consider removing this as the `uv` options doesn't always
+    // work well with pinUvAuthParam
     pub option_up: Option<bool>,
     pub option_uv: Option<bool>,
     pub client_data_hash: Vec<u8>,
@@ -192,11 +194,13 @@ pub fn create_payload_t(
     // 0x07 : options
     let options = {
         let mut options_map = BTreeMap::new();
+
         options_map.insert(Value::Text("rk".to_string()), Value::Bool(params.option_rk));
 
         if let Some(v) = params.option_up {
             options_map.insert(Value::Text("up".to_string()), Value::Bool(v));
         }
+
         if let Some(v) = params.option_uv {
             options_map.insert(Value::Text("uv".to_string()), Value::Bool(v));
         }

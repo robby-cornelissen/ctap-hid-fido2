@@ -24,6 +24,7 @@ pub use get_assertion::{Extension as AssertionExtension, GetAssertionArgsBuilder
 
 pub use make_credential::{
     CredentialSupportedKeyType, Extension as CredentialExtension, MakeCredentialArgsBuilder,
+    MakeCredentialArgsBuilderT,
 };
 
 pub struct FidoKeyHid {

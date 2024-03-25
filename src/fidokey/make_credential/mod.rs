@@ -1,7 +1,6 @@
 pub mod make_credential_command;
 pub mod make_credential_params;
 pub mod make_credential_response;
-use self::make_credential_params::{MakeCredentialArgsBuilderT, MakeCredentialArgsT};
 
 use super::{
     credential_management::credential_management_params::CredentialProtectionPolicy,
@@ -13,11 +12,15 @@ use crate::{
 };
 pub use make_credential_params::{
     Attestation, CredentialSupportedKeyType, Extension, Extension as Mext, MakeCredentialArgs,
-    MakeCredentialArgsBuilder,
+    MakeCredentialArgsBuilder, MakeCredentialArgsBuilderT, MakeCredentialArgsT,
 };
 
 impl FidoKeyHid {
-    pub fn make_credential_with_args_t(&self, token: Option<&Token>, args: &MakeCredentialArgsT) -> Result<Attestation> {
+    pub fn make_credential_with_args_t(
+        &self,
+        token: Option<&Token>,
+        args: &MakeCredentialArgsT,
+    ) -> Result<Attestation> {
         // init
         let cid = ctaphid::ctaphid_init(self)?;
 
@@ -205,7 +208,7 @@ impl FidoKeyHid {
         let arg = builder.build();
         self.make_credential_with_args(&arg)
     }
-    
+
     pub fn make_credential_with_extensions_t(
         &self,
         token: Option<&Token>,
