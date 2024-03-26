@@ -38,16 +38,16 @@ pub type Cfg = LibCfg;
 pub struct LibCfg {
     pub enable_log: bool,
     pub use_pre_bio_enrollment: bool,
-    pub use_pre_credential_management: bool,
     pub keep_alive_msg: String,
 }
 
 impl LibCfg {
     pub fn init() -> Self {
+        // Not amazing. Whether to use preview features even when the release features
+        // are available should not be decided here.
         LibCfg {
             enable_log: false,
-            use_pre_bio_enrollment: true,
-            use_pre_credential_management: true,
+            use_pre_bio_enrollment: false,
             keep_alive_msg: "- Touch the sensor on the authenticator".to_string(),
         }
     }

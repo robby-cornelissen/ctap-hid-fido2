@@ -31,7 +31,6 @@ pub struct FidoKeyHid {
     device_internal: hidapi::HidDevice,
     pub enable_log: bool,
     pub use_pre_bio_enrollment: bool,
-    pub use_pre_credential_management: bool,
     pub up_needed_prompt: String, // should turn this into an option
     pub prompt_tx: Option<Sender<Option<String>>>,
 }
@@ -54,7 +53,6 @@ impl FidoKeyHid {
                     device_internal: dev,
                     enable_log: cfg.enable_log,
                     use_pre_bio_enrollment: cfg.use_pre_bio_enrollment,
-                    use_pre_credential_management: cfg.use_pre_credential_management,
                     up_needed_prompt: cfg.keep_alive_msg.to_string(),
                     prompt_tx,
                 };
