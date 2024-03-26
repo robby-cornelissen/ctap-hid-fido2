@@ -66,7 +66,7 @@ impl From<u8> for CtapError {
             0x34 => ("CTAP2_ERR_PIN_AUTH_BLOCKED", "PIN authentication using pinUvAuthToken blocked. Requires power cycle to reset."),
             0x35 => ("CTAP2_ERR_PIN_NOT_SET", "No PIN has been set."),
             0x36 => ("CTAP2_ERR_PIN_REQUIRED", "A pinUvAuthToken is required for the selected operation."),
-            0x37 => ("CTAP2_ERR_PIN_POLICY_VIOLATION", "PIN policy violation. Currently only enforces minimum length."),
+            0x37 => ("CTAP2_ERR_PIN_POLICY_VIOLATION", "PIN policy violation."),
             0x38 => ("CTAP2_ERR_PIN_TOKEN_EXPIRED", "PIN token expired on authenticator."), // "Reserved for Future Use" in current spec
             0x39 => ("CTAP2_ERR_REQUEST_TOO_LARGE", "Authenticator cannot handle this request due to memory constraints."),
             0x3A => ("CTAP2_ERR_ACTION_TIMEOUT", "The current operation has timed out."),

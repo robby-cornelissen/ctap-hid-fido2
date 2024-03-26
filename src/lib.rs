@@ -12,7 +12,6 @@ mod encrypt {
     pub mod shared_secret;
 }
 mod hmac_ext;
-mod pintoken;
 pub mod public_key;
 pub mod public_key_credential_descriptor;
 pub mod public_key_credential_parameters;

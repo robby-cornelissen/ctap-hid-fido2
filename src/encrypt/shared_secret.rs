@@ -1,5 +1,5 @@
 use crate::{
-    encrypt::cose::CoseKey, encrypt::enc_aes256_cbc, encrypt::p256, pintoken::PinToken,
+    encrypt::cose::CoseKey, encrypt::enc_aes256_cbc, encrypt::p256,
     result::Result,
 };
 use ring::{agreement, digest, error::Unspecified, rand};
@@ -51,9 +51,8 @@ impl SharedSecret {
         Ok(out_bytes)
     }
 
-    pub fn decrypt_token(&self, data: &mut [u8]) -> Result<PinToken> {
+    pub fn decrypt(self, data: &mut [u8]) -> Result<Vec<u8>> {
         let dec = enc_aes256_cbc::decrypt_message(&self.secret, data);
-        let pin_token = PinToken::new(&dec);
-        Ok(pin_token)
+        Ok(dec)
     }
 }

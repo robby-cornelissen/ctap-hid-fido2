@@ -1,15 +1,8 @@
-use crate::{pintoken::PinToken, str_buf::StrBuf, util};
+use crate::{str_buf::StrBuf, util};
 use std::fmt;
 
 pub struct EnrollStatus1T {
     pub cid: [u8; 4],
-    pub template_id: Vec<u8>,
-}
-
-// TODO remove
-pub struct EnrollStatus1 {
-    pub cid: [u8; 4],
-    pub pin_token: Option<PinToken>,
     pub template_id: Vec<u8>,
 }
 

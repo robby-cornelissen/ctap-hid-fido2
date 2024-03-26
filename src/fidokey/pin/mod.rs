@@ -5,8 +5,7 @@ use super::FidoKeyHid;
 use crate::{
     ctaphid,
     encrypt::{enc_aes256_cbc, enc_hmac_sha_256, shared_secret::SharedSecret},
-    pintoken::{Permissions, PinToken},
-    result::Result,
+    result::Result, token::{Permissions, Token},
 };
 use client_pin_command::SubCommand as PinCmd;
 pub use client_pin_command::*;
@@ -126,7 +125,7 @@ impl FidoKeyHid {
     }
 
     // CTAP 2.0 PIN token
-    pub fn get_pin_token(&self, pin_uv_auth_protocol: u32, pin: &str) -> Result<PinToken> {
+    pub fn get_pin_token(&self, pin_uv_auth_protocol: u32, pin: &str) -> Result<Token> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let authenticator_key_agreement =
@@ -146,9 +145,12 @@ impl FidoKeyHid {
         let mut pin_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
 
-        let pin_token_decrypted = shared_secret.decrypt_token(&mut pin_token_encrypted)?;
+        let pin_token_decrypted = shared_secret.decrypt(&mut pin_token_encrypted)?;
 
-        Ok(pin_token_decrypted)
+        Ok(Token {
+            key: pin_token_decrypted,
+            protocol: pin_uv_auth_protocol,
+        })
     }
 
     // CTAP 2.1 PIN auth token using permissions
@@ -158,7 +160,7 @@ impl FidoKeyHid {
         pin: &str,
         permissions: u8,
         rp_id: Option<&str>,
-    ) -> Result<PinToken> {
+    ) -> Result<Token> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let authenticator_key_agreement =
@@ -178,9 +180,12 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token = shared_secret.decrypt_token(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
 
-        Ok(auth_token)
+        Ok(Token {
+            key: auth_token_decrypted,
+            protocol: pin_uv_auth_protocol,
+        })
     }
 
     // CTAP 2.1 UV auth token using permissions
@@ -189,7 +194,7 @@ impl FidoKeyHid {
         pin_uv_auth_protocol: u32,
         permissions: u8,
         rp_id: Option<&str>,
-    ) -> Result<PinToken> {
+    ) -> Result<Token> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let authenticator_key_agreement =
@@ -207,28 +212,12 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token = shared_secret.decrypt_token(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
 
-        Ok(auth_token)
-    }
-
-    // This one needs to go as well
-    pub fn get_auth_token(
-        &self,
-        pin_uv_auth_protocol: u32,
-        pin: Option<&str>,
-        permissions: u8,
-        rp_id: Option<&str>,
-    ) -> Result<PinToken> {
-        let cid = ctaphid::ctaphid_init(self)?;
-
-        self.get_pin_uv_auth_token(
-            &cid,
-            pin_uv_auth_protocol,
-            pin,
-            Permissions::from_bits_truncate(permissions),
-            rp_id,
-        )
+        Ok(Token {
+            key: auth_token_decrypted,
+            protocol: pin_uv_auth_protocol,
+        })
     }
 }
 
@@ -288,47 +277,4 @@ fn pad_pin(pin: &str) -> Result<Vec<u8>> {
     }
 
     Ok(padded_pin)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::SubCommand as PinCmd;
-    use super::*;
-    use crate::ctaphid;
-    use crate::fidokey::FidoKeyHid;
-    use crate::Cfg;
-    use crate::HidParam;
-
-    #[test]
-    fn test_client_pin_get_keyagreement() {
-        let hid_params = HidParam::get();
-        let device = FidoKeyHid::new(&hid_params, &Cfg::init(), None).unwrap();
-        let cid = ctaphid::ctaphid_init(&device).unwrap();
-
-        let send_payload =
-            create_payload(PinCmd::GetKeyAgreement, DEFAULT_PIN_UV_AUTH_PROTOCOL).unwrap();
-        let response_cbor = ctaphid::ctaphid_cbor(&device, &cid, &send_payload).unwrap();
-
-        let key_agreement =
-            client_pin_response::parse_cbor_client_pin_get_keyagreement(&response_cbor).unwrap();
-        println!("authenticatorClientPIN (0x06) - getKeyAgreement");
-        println!("{}", key_agreement);
-
-        assert!(true);
-    }
-
-    #[test]
-    fn test_client_pin_get_any_pin_token() {
-        let hid_params = HidParam::get();
-        let mut hid_cfg = Cfg::init();
-        hid_cfg.enable_log = true;
-        let device = FidoKeyHid::new(&hid_params, &hid_cfg, None).unwrap();
-
-        match device.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, "0000") {
-            Ok(_) => println!("Got PIN token"),
-            Err(e) => println!("{}", e),
-        }
-
-        assert!(true);
-    }
 }

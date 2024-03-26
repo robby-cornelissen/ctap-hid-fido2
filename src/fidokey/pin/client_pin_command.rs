@@ -1,7 +1,7 @@
 use crate::ctapdef;
 use crate::encrypt::cose;
-use crate::pintoken::Permissions;
 use crate::result::Result;
+use crate::token::Permissions;
 use serde_cbor::Value;
 use std::collections::BTreeMap;
 

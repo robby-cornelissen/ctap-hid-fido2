@@ -20,11 +20,10 @@ mod wink;
 
 use crate::Result;
 
-pub use get_assertion::{Extension as AssertionExtension, GetAssertionArgsBuilder};
+pub use get_assertion::Extension as AssertionExtension;
 
 pub use make_credential::{
-    CredentialSupportedKeyType, Extension as CredentialExtension, MakeCredentialArgsBuilder,
-    MakeCredentialArgsBuilderT,
+    CredentialSupportedKeyType, Extension as CredentialExtension, MakeCredentialArgsBuilderT,
 };
 
 pub struct FidoKeyHid {
