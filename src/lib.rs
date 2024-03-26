@@ -37,7 +37,6 @@ pub type Cfg = LibCfg;
 #[derive(Clone)]
 pub struct LibCfg {
     pub enable_log: bool,
-    pub use_pre_bio_enrollment: bool,
     pub keep_alive_msg: String,
 }
 
@@ -47,7 +46,6 @@ impl LibCfg {
         // are available should not be decided here.
         LibCfg {
             enable_log: false,
-            use_pre_bio_enrollment: false,
             keep_alive_msg: "- Touch the sensor on the authenticator".to_string(),
         }
     }

@@ -14,18 +14,26 @@ pub use bio_enrollment_params::*;
 use super::pin::DEFAULT_PIN_UV_AUTH_PROTOCOL;
 
 impl FidoKeyHid {
-    pub fn bio_enrollment_get_fingerprint_sensor_info_t(&self) -> Result<BioSensorInfo> {
+    pub fn bio_enrollment_get_fingerprint_sensor_info_t(
+        &self,
+        use_preview: bool,
+    ) -> Result<BioSensorInfo> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         // 6.7.2. Get bio modality
-        let data1 = self.bio_enrollment_t(&cid, None, None)?;
+        let data1 = self.bio_enrollment_t(&cid, None, None, use_preview)?;
 
         if self.enable_log {
             println!("{}", data1);
         }
 
         // 6.7.3. Get fingerprint sensor info
-        let data2 = self.bio_enrollment_t(&cid, None, Some(BioCmd::GetFingerprintSensorInfo))?;
+        let data2 = self.bio_enrollment_t(
+            &cid,
+            None,
+            Some(BioCmd::GetFingerprintSensorInfo),
+            use_preview,
+        )?;
 
         if self.enable_log {
             println!("{}", data2);
@@ -69,6 +77,7 @@ impl FidoKeyHid {
         &self,
         token: &Token,
         timeout_milliseconds: Option<u16>,
+        use_preview: bool,
     ) -> Result<(EnrollStatus1T, EnrollStatus2)> {
         let cid = ctaphid::ctaphid_init(self)?;
 
@@ -76,6 +85,7 @@ impl FidoKeyHid {
             &cid,
             Some(token),
             Some(BioCmd::EnrollBegin(timeout_milliseconds)),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -143,6 +153,7 @@ impl FidoKeyHid {
         token: &Token,
         enroll_status: &EnrollStatus1,
         timeout_milliseconds: Option<u16>,
+        use_preview: bool,
     ) -> Result<EnrollStatus2> {
         let template_info = TemplateInfo::new(&enroll_status.template_id, None);
 
@@ -153,6 +164,7 @@ impl FidoKeyHid {
                 template_info,
                 timeout_milliseconds,
             )),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -206,11 +218,17 @@ impl FidoKeyHid {
         Ok(result)
     }
 
-    pub fn bio_enrollment_cancel_t(&self, token: &Token, enroll_status: &EnrollStatus1) -> Result<()> {
+    pub fn bio_enrollment_cancel_t(
+        &self,
+        token: &Token,
+        enroll_status: &EnrollStatus1,
+        use_preview: bool,
+    ) -> Result<()> {
         let data = self.bio_enrollment_t(
             &enroll_status.cid,
             Some(token),
             Some(BioCmd::CancelCurrentEnrollment),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -236,13 +254,18 @@ impl FidoKeyHid {
         Ok(())
     }
 
-    pub fn bio_enrollment_enumerate_enrollments_t(&self, token: &Token) -> Result<Vec<TemplateInfo>> {
+    pub fn bio_enrollment_enumerate_enrollments_t(
+        &self,
+        token: &Token,
+        use_preview: bool,
+    ) -> Result<Vec<TemplateInfo>> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let data = self.bio_enrollment_t(
             &cid,
             Some(token),
             Some(BioCmd::EnumerateEnrollments),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -277,6 +300,7 @@ impl FidoKeyHid {
         token: &Token,
         template_id: &[u8],
         template_name: &str,
+        use_preview: bool,
     ) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
 
@@ -286,6 +310,7 @@ impl FidoKeyHid {
             &cid,
             Some(&token),
             Some(BioCmd::SetFriendlyName(template_info)),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -322,7 +347,12 @@ impl FidoKeyHid {
         Ok(())
     }
 
-    pub fn bio_enrollment_remove_t(&self, token: &Token, template_id: &[u8]) -> Result<()> {
+    pub fn bio_enrollment_remove_t(
+        &self,
+        token: &Token,
+        template_id: &[u8],
+        use_preview: bool,
+    ) -> Result<()> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let template_info = TemplateInfo::new(template_id, None);
@@ -330,6 +360,7 @@ impl FidoKeyHid {
             &cid,
             Some(token),
             Some(BioCmd::RemoveEnrollment(template_info)),
+            use_preview,
         )?;
 
         if self.enable_log {
@@ -364,12 +395,10 @@ impl FidoKeyHid {
         cid: &[u8; 4],
         token: Option<&Token>,
         sub_command: Option<bio_enrollment_command::SubCommand>,
+        use_preview: bool,
     ) -> Result<BioEnrollmentData> {
-        let send_payload = bio_enrollment_command::create_payload_t(
-            token,
-            sub_command,
-            self.use_pre_bio_enrollment,
-        )?;
+        let send_payload =
+            bio_enrollment_command::create_payload_t(token, sub_command, use_preview)?;
 
         if self.enable_log {
             println!("send(cbor) = {}", util::to_hex_str(&send_payload));
@@ -394,7 +423,8 @@ impl FidoKeyHid {
         let send_payload = bio_enrollment_command::create_payload(
             pin_token,
             sub_command,
-            self.use_pre_bio_enrollment,
+            true, // TODO function will be removed anyway
+                  // self.use_pre_bio_enrollment,
         )?;
 
         if self.enable_log {
@@ -417,7 +447,9 @@ impl FidoKeyHid {
 
         let pin_token = {
             if let Some(pin) = pin {
-                if self.use_pre_bio_enrollment {
+                // TODO function to be removed anyway
+                // if self.use_pre_bio_enrollment {
+                if true {
                     Some(self.get_pin_token(DEFAULT_PIN_UV_AUTH_PROTOCOL, pin)?)
                 } else {
                     Some(self.get_pin_uv_auth_token(
