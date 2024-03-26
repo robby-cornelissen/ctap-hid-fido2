@@ -1,8 +1,8 @@
 use super::make_credential_params::Extension as Mext;
 use super::CredentialProtectionPolicy;
-use crate::{public_key::PublicKey, public_key_credential_rp_entity::PublicKeyCredentialRpEntity};
 use crate::public_key_credential_descriptor::PublicKeyCredentialDescriptor;
 use crate::public_key_credential_user_entity::PublicKeyCredentialUserEntity;
+use crate::{public_key::PublicKey, public_key_credential_rp_entity::PublicKeyCredentialRpEntity};
 use strum_macros::{AsRefStr, Display};
 
 /// Attestation Object
@@ -53,7 +53,7 @@ impl std::default::Default for CredentialSupportedKeyType {
     }
 }
 
-pub struct MakeCredentialArgsT {
+pub struct MakeCredentialArgs {
     pub rpid: String,
     pub challenge: Vec<u8>,
     pub key_types: Vec<CredentialSupportedKeyType>,
@@ -66,7 +66,7 @@ pub struct MakeCredentialArgsT {
 }
 
 #[derive(Default)]
-pub struct MakeCredentialArgsBuilderT<> {
+pub struct MakeCredentialArgsBuilder {
     rpid: String,
     challenge: Vec<u8>,
     key_types: Vec<CredentialSupportedKeyType>,
@@ -78,7 +78,7 @@ pub struct MakeCredentialArgsBuilderT<> {
     extensions: Option<Vec<Mext>>,
 }
 
-impl<'a> MakeCredentialArgsBuilderT {
+impl<'a> MakeCredentialArgsBuilder {
     pub fn new(rpid: &str, challenge: &[u8]) -> Self {
         Self {
             uv: None,
@@ -95,10 +95,7 @@ impl<'a> MakeCredentialArgsBuilderT {
         self
     }
 
-    pub fn key_type(
-        mut self,
-        key_type: CredentialSupportedKeyType,
-    ) -> Self {
+    pub fn key_type(mut self, key_type: CredentialSupportedKeyType) -> Self {
         self.key_types.push(key_type);
         self
     }
@@ -108,10 +105,7 @@ impl<'a> MakeCredentialArgsBuilderT {
         self
     }
 
-    pub fn user_entity(
-        mut self,
-        user_entity: &PublicKeyCredentialUserEntity,
-    ) -> Self {
+    pub fn user_entity(mut self, user_entity: &PublicKeyCredentialUserEntity) -> Self {
         self.user_entity = Some(user_entity.clone());
         self
     }
@@ -120,10 +114,7 @@ impl<'a> MakeCredentialArgsBuilderT {
     // entity might conflict with the one already set on the builder. Probably
     // should favor refactoring to require the RP entity instead of the RP ID
     // on the builder's constructor.
-    pub fn rp_entity(
-        mut self,
-        rp_entity: &PublicKeyCredentialRpEntity,
-    ) -> Self {
+    pub fn rp_entity(mut self, rp_entity: &PublicKeyCredentialRpEntity) -> Self {
         self.rp_entity = Some(rp_entity.clone());
         self
     }
@@ -133,8 +124,8 @@ impl<'a> MakeCredentialArgsBuilderT {
         self
     }
 
-    pub fn build(self) -> MakeCredentialArgsT {
-        MakeCredentialArgsT {
+    pub fn build(self) -> MakeCredentialArgs {
+        MakeCredentialArgs {
             rpid: self.rpid,
             challenge: self.challenge,
             key_types: self.key_types,

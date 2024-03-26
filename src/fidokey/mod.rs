@@ -23,7 +23,7 @@ use crate::Result;
 pub use get_assertion::Extension as AssertionExtension;
 
 pub use make_credential::{
-    CredentialSupportedKeyType, Extension as CredentialExtension, MakeCredentialArgsBuilderT,
+    CredentialSupportedKeyType, Extension as CredentialExtension, MakeCredentialArgsBuilder,
 };
 
 pub struct FidoKeyHid {

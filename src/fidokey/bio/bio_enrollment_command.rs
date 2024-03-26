@@ -35,7 +35,7 @@ impl SubCommandBase for SubCommand {
     }
 }
 
-pub fn create_payload_t(
+pub fn create_payload(
     token: Option<&Token>,
     sub_command: Option<SubCommand>,
     use_pre_bio_enrollment: bool,

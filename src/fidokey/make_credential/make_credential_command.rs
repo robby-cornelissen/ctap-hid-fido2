@@ -8,7 +8,7 @@ use serde_cbor::Value;
 use std::collections::BTreeMap;
 
 #[derive(Default)]
-pub struct ParamsT {
+pub struct Params {
     pub rp_id: String,
     pub rp_name: String,
     pub user_id: Vec<u8>,
@@ -23,7 +23,7 @@ pub struct ParamsT {
 }
 
 // TODO probably can remove this as well
-impl ParamsT {
+impl Params {
     pub fn new(rp_id: &str, challenge: Vec<u8>, user_id: Vec<u8>) -> Self {
         Self {
             rp_id: rp_id.to_string(),
@@ -35,9 +35,9 @@ impl ParamsT {
     }
 }
 
-pub fn create_payload_t(
+pub fn create_payload(
     token: Option<&Token>,
-    params: ParamsT,
+    params: Params,
     extensions: Option<&Vec<Extension>>,
 ) -> Vec<u8> {
     // 0x01 : clientDataHash

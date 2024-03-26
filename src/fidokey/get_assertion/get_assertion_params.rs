@@ -35,7 +35,7 @@ impl Extension {
         Extension::HmacSecret(Some(<[u8; 32]>::try_from(hasher.as_ref()).unwrap()))
     }
 }
-pub struct GetAssertionArgsT {
+pub struct GetAssertionArgs {
     pub rp_id: String,
     pub challenge: Vec<u8>,
     pub credential_ids: Vec<Vec<u8>>,
@@ -43,14 +43,14 @@ pub struct GetAssertionArgsT {
     pub extensions: Option<Vec<Extension>>,
 }
 
-impl GetAssertionArgsT {
-    pub fn builder() -> GetAssertionArgsBuilderT {
-        GetAssertionArgsBuilderT::default()
+impl GetAssertionArgs {
+    pub fn builder() -> GetAssertionArgsBuilder {
+        GetAssertionArgsBuilder::default()
     }
 }
 
 #[derive(Default)]
-pub struct GetAssertionArgsBuilderT {
+pub struct GetAssertionArgsBuilder {
     rp_id: String,
     challenge: Vec<u8>,
     credential_ids: Vec<Vec<u8>>,
@@ -58,7 +58,7 @@ pub struct GetAssertionArgsBuilderT {
     extensions: Option<Vec<Extension>>,
 }
 
-impl GetAssertionArgsBuilderT {
+impl GetAssertionArgsBuilder {
     pub fn new(rp_id: &str, challenge: &[u8]) -> Self {
         Self {
             uv: Some(true), // TODO need to check this
@@ -88,8 +88,8 @@ impl GetAssertionArgsBuilderT {
         self
     }
 
-    pub fn build(self) -> GetAssertionArgsT {
-        GetAssertionArgsT {
+    pub fn build(self) -> GetAssertionArgs {
+        GetAssertionArgs {
             rp_id: self.rp_id,
             challenge: self.challenge,
             credential_ids: self.credential_ids,

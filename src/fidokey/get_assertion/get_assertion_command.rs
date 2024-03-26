@@ -9,7 +9,7 @@ use serde_cbor::Value;
 use std::collections::BTreeMap;
 
 #[derive(Debug, Default)]
-pub struct ParamsT {
+pub struct Params {
     pub rp_id: String,
     pub client_data_hash: Vec<u8>,
     pub allowlist_credential_ids: Vec<Vec<u8>>,
@@ -17,7 +17,7 @@ pub struct ParamsT {
     pub option_uv: Option<bool>,
 }
 
-impl ParamsT {
+impl Params {
     pub fn new(rp_id: &str, challenge: Vec<u8>, credential_ids: Vec<Vec<u8>>) -> Self {
         Self {
             rp_id: rp_id.to_string(),
@@ -28,9 +28,9 @@ impl ParamsT {
     }
 }
 
-pub fn create_payload_t(
+pub fn create_payload(
     token: Option<&Token>,
-    params: ParamsT,
+    params: Params,
     extensions: Option<&Vec<Extension>>,
     hmac_ext: Option<HmacExt>,
 ) -> Vec<u8> {

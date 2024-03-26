@@ -8,10 +8,10 @@ use crate::result::Result;
 use get_assertion_params::{Assertion, Extension as Gext};
 pub use get_assertion_params::Extension;
 
-use self::get_assertion_params::{GetAssertionArgsBuilderT, GetAssertionArgsT};
+use self::get_assertion_params::{GetAssertionArgsBuilder, GetAssertionArgs};
 
 impl FidoKeyHid {
-    pub fn get_assertion_with_args_t(&self, token: Option<&Token>, args: &GetAssertionArgsT) -> Result<Vec<Assertion>> {
+    pub fn get_assertion_with_args(&self, token: Option<&Token>, args: &GetAssertionArgs) -> Result<Vec<Assertion>> {
         let cid = ctaphid::ctaphid_init(self)?;
 
         let credential_ids = &args.credential_ids;
@@ -24,7 +24,7 @@ impl FidoKeyHid {
 
         // create command
         let send_payload = {
-            let mut params = get_assertion_command::ParamsT::new(
+            let mut params = get_assertion_command::Params::new(
                 &args.rp_id,
                 args.challenge.to_vec(),
                 credential_ids.to_vec(),
@@ -32,7 +32,7 @@ impl FidoKeyHid {
             params.option_up = true;
             params.option_uv = args.uv;
 
-            get_assertion_command::create_payload_t(token, params, extensions, hmac_ext.clone())
+            get_assertion_command::create_payload(token, params, extensions, hmac_ext.clone())
         };
 
         // send & response
@@ -52,25 +52,25 @@ impl FidoKeyHid {
         Ok(assertions)
     }
 
-    pub fn get_assertion_t(
+    pub fn get_assertion(
         &self,
         token: Option<&Token>,
         rp_id: &str,
         challenge: &[u8],
         credential_ids: &[Vec<u8>],
     ) -> Result<Assertion> {
-        let mut builder = GetAssertionArgsBuilderT::new(rp_id, challenge);
+        let mut builder = GetAssertionArgsBuilder::new(rp_id, challenge);
         for credential_id in credential_ids {
             builder = builder.add_credential_id(credential_id);
         }
 
         let args = builder.build();
-        let assertions = self.get_assertion_with_args_t(token, &args)?;
+        let assertions = self.get_assertion_with_args(token, &args)?;
 
         Ok(assertions[0].clone())
     }
 
-    pub fn get_assertion_with_extensions_t(
+    pub fn get_assertion_with_extensions(
         &self,
         token: Option<&Token>,
         rp_id: &str,
@@ -78,7 +78,7 @@ impl FidoKeyHid {
         credential_ids: &[Vec<u8>],
         extensions: Option<&Vec<Gext>>,
     ) -> Result<Assertion> {
-        let mut builder = GetAssertionArgsBuilderT::new(rp_id, challenge);
+        let mut builder = GetAssertionArgsBuilder::new(rp_id, challenge);
         for credential_id in credential_ids {
             builder = builder.add_credential_id(credential_id);
         }
@@ -88,21 +88,21 @@ impl FidoKeyHid {
         }
 
         let args = builder.build();
-        let assertions = self.get_assertion_with_args_t(token, &args)?;
+        let assertions = self.get_assertion_with_args(token, &args)?;
 
         Ok(assertions[0].clone())
     }
 
-    pub fn get_assertions_rk_t(
+    pub fn get_assertions_rk(
         &self,
         token: Option<&Token>,
         rp_id: &str,
         challenge: &[u8],
     ) -> Result<Vec<Assertion>> {
-        let builder = GetAssertionArgsBuilderT::new(rp_id, challenge);
+        let builder = GetAssertionArgsBuilder::new(rp_id, challenge);
         let args = builder.build();
 
-        self.get_assertion_with_args_t(token, &args)
+        self.get_assertion_with_args(token, &args)
     }
 }
 

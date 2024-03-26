@@ -5,15 +5,15 @@ pub mod make_credential_response;
 use super::credential_management::credential_management_params::CredentialProtectionPolicy;
 use crate::{ctaphid, result::Result, token::Token, FidoKeyHid};
 pub use make_credential_params::{
-    Attestation, CredentialSupportedKeyType, Extension, Extension as Mext,
-    MakeCredentialArgsBuilderT, MakeCredentialArgsT,
+    Attestation, CredentialSupportedKeyType, Extension, Extension as Mext, MakeCredentialArgs,
+    MakeCredentialArgsBuilder,
 };
 
 impl FidoKeyHid {
-    pub fn make_credential_with_args_t(
+    pub fn make_credential_with_args(
         &self,
         token: Option<&Token>,
-        args: &MakeCredentialArgsT,
+        args: &MakeCredentialArgs,
     ) -> Result<Attestation> {
         // init
         let cid = ctaphid::ctaphid_init(self)?;
@@ -29,7 +29,7 @@ impl FidoKeyHid {
         // create command
         let send_payload = {
             let mut params =
-                make_credential_command::ParamsT::new(&args.rpid, args.challenge.to_vec(), user_id);
+                make_credential_command::Params::new(&args.rpid, args.challenge.to_vec(), user_id);
 
             params.option_rk = args.rk.unwrap_or(false);
             params.option_uv = args.uv;
@@ -58,7 +58,7 @@ impl FidoKeyHid {
                 None
             };
 
-            make_credential_command::create_payload_t(token, params, extensions)
+            make_credential_command::create_payload(token, params, extensions)
         };
 
         // send & response
@@ -68,47 +68,47 @@ impl FidoKeyHid {
         Ok(attestation)
     }
 
-    pub fn make_credential_t(
+    pub fn make_credential(
         &self,
         token: Option<&Token>,
         rpid: &str,
         challenge: &[u8],
     ) -> Result<Attestation> {
-        let builder = MakeCredentialArgsBuilderT::new(rpid, challenge);
+        let builder = MakeCredentialArgsBuilder::new(rpid, challenge);
         let args = builder.build();
 
-        self.make_credential_with_args_t(token, &args)
+        self.make_credential_with_args(token, &args)
     }
 
-    pub fn make_credential_with_key_type_t(
+    pub fn make_credential_with_key_type(
         &self,
         token: Option<&Token>,
         rpid: &str,
         challenge: &[u8],
         key_type: Option<CredentialSupportedKeyType>,
     ) -> Result<Attestation> {
-        let mut builder = MakeCredentialArgsBuilderT::new(rpid, challenge);
+        let mut builder = MakeCredentialArgsBuilder::new(rpid, challenge);
         if let Some(key_type) = key_type {
             builder = builder.key_type(key_type);
         }
         let args = builder.build();
 
-        self.make_credential_with_args_t(token, &args)
+        self.make_credential_with_args(token, &args)
     }
 
-    pub fn make_credential_with_extensions_t(
+    pub fn make_credential_with_extensions(
         &self,
         token: Option<&Token>,
         rpid: &str,
         challenge: &[u8],
         extensions: Option<&Vec<Mext>>,
     ) -> Result<Attestation> {
-        let mut builder = MakeCredentialArgsBuilderT::new(rpid, challenge);
+        let mut builder = MakeCredentialArgsBuilder::new(rpid, challenge);
         if let Some(extensions) = extensions {
             builder = builder.extensions(extensions);
         }
         let args = builder.build();
 
-        self.make_credential_with_args_t(token, &args)
+        self.make_credential_with_args(token, &args)
     }
 }

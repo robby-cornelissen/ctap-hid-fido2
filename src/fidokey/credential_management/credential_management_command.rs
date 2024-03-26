@@ -37,7 +37,7 @@ impl SubCommandBase for SubCommand {
     }
 }
 
-pub fn create_payload_t(
+pub fn create_payload(
     token: &Token,
     sub_command: SubCommand,
     use_pre_credential_management: bool,

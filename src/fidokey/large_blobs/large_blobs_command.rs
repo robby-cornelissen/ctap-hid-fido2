@@ -5,7 +5,7 @@ use ring::digest;
 use serde_cbor::{to_vec, Value};
 use std::collections::BTreeMap;
 
-pub fn create_payload_t(
+pub fn create_payload(
     token: Option<&Token>,
     offset: u32,
     get: Option<u32>,
