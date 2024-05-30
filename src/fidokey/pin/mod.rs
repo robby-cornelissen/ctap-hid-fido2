@@ -145,7 +145,7 @@ impl FidoKeyHid {
         let mut pin_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
 
-        let pin_token_decrypted = shared_secret.decrypt(&mut pin_token_encrypted)?;
+        let pin_token_decrypted = shared_secret.decrypt_protocol_1(&mut pin_token_encrypted)?;
 
         Ok(Token {
             key: pin_token_decrypted,
@@ -180,7 +180,7 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt_protocol_1(&mut auth_token_encrypted)?;
 
         Ok(Token {
             key: auth_token_decrypted,
@@ -212,7 +212,7 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt_protocol_1(&mut auth_token_encrypted)?;
 
         Ok(Token {
             key: auth_token_decrypted,

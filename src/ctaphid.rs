@@ -25,6 +25,8 @@ const CTAPHID_KEEPALIVE: u8 = CTAP_FRAME_INIT | 0x3B;
 const CTAPHID_KEEPALIVE_STATUS_UP_NEEDED: u8 = 0x02; // The authenticator is waiting for user presence.
 
 pub fn ctaphid_init(device: &FidoKeyHid) -> Result<[u8; 4]> {
+    println!("Initializing CTAP HID");
+
     // CTAPHID_INIT
     let mut cmd: [u8; 65] = [0; 65];
 
