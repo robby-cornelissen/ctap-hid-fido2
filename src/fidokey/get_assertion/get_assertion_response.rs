@@ -1,7 +1,6 @@
 use super::get_assertion_params;
 use super::get_assertion_params::Extension;
 use crate::auth_data::Flags;
-use crate::encrypt::enc_aes256_cbc;
 use crate::encrypt::shared_secret::SharedSecret;
 use crate::public_key_credential_user_entity::PublicKeyCredentialUserEntity;
 use crate::result::Result;
@@ -66,11 +65,7 @@ fn parse_cbor_authdata(
                     // > One salt case: "hmac-secret": encrypt(shared secret, output1)
                     let hmac_secret = util::cbor_value_to_vec_u8(val)?;
 
-                    // decrypt hmac_secret -> output1
-                    let output1 = enc_aes256_cbc::decrypt_message(
-                        &shared_secret.as_ref().unwrap().secret,
-                        &hmac_secret[0..32],
-                    );
+                    let output1 = shared_secret.unwrap().decrypt(&hmac_secret[0..32])?;
 
                     // The output1 is created in Authenticator as follows.
                     // >output1: HMAC-SHA-256(CredRandom, salt1)

@@ -119,8 +119,7 @@ fn create_hmac_ext(
 ) -> Result<Option<HmacExt>> {
     if let Some(extensions) = extensions {
         if let Some(Gext::HmacSecret(n)) = extensions.iter().next() {
-            let mut hmac_ext = HmacExt::default();
-            hmac_ext.create(device, cid, &n.unwrap(), None)?;
+            let hmac_ext = HmacExt::create(device, cid, &n.unwrap(), None)?;
             return Ok(Some(hmac_ext));
         }
         Ok(None)

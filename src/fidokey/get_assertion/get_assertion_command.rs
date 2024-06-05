@@ -75,7 +75,7 @@ pub fn create_payload(
             let mut hmac_ext_map = BTreeMap::new();
 
             // keyAgreement(0x01)
-            let val = hmac_ext.shared_secret.public_key.to_value().unwrap();
+            let val = hmac_ext.shared_secret.get_public_key().to_value().unwrap();
             hmac_ext_map.insert(Value::Integer(0x01), val);
 
             // saltEnc(0x02)

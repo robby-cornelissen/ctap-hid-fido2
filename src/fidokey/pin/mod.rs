@@ -4,12 +4,14 @@ mod client_pin_response;
 use super::FidoKeyHid;
 use crate::{
     ctaphid,
-    encrypt::{enc_aes256_cbc, enc_hmac_sha_256, shared_secret::SharedSecret},
-    result::Result, token::{Permissions, Token},
+    encrypt::shared_secret::SharedSecret,
+    result::Result,
+    token::{Permissions, Token},
 };
 use client_pin_command::SubCommand as PinCmd;
 pub use client_pin_command::*;
 pub use client_pin_response::*;
+use ring::digest;
 
 pub const DEFAULT_PIN_UV_AUTH_PROTOCOL: u32 = 1;
 
@@ -70,7 +72,7 @@ impl FidoKeyHid {
         let key_agreement =
             client_pin_response::parse_cbor_client_pin_get_keyagreement(&response_cbor)?;
 
-        let shared_secret = SharedSecret::new(&key_agreement)?;
+        let shared_secret = SharedSecret::create(pin_uv_auth_protocol, &key_agreement)?;
 
         let pin_encrypted = encrypt_pin(&shared_secret, pin)?;
 
@@ -78,7 +80,7 @@ impl FidoKeyHid {
 
         let send_payload = client_pin_command::create_payload_set_pin(
             pin_uv_auth_protocol,
-            &shared_secret.public_key,
+            &shared_secret.get_public_key(),
             &pin_auth,
             &pin_encrypted,
         );
@@ -103,9 +105,9 @@ impl FidoKeyHid {
 
         let key_agreement =
             client_pin_response::parse_cbor_client_pin_get_keyagreement(&response_cbor)?;
-        let shared_secret = SharedSecret::new(&key_agreement)?;
+        let shared_secret = SharedSecret::create(pin_uv_auth_protocol, &key_agreement)?;
         let new_pin_encrypted = encrypt_pin(&shared_secret, new_pin)?;
-        let current_pin_hash_encrypted = shared_secret.encrypt_pin(current_pin)?;
+        let current_pin_hash_encrypted = encrypt_pin_hash(&shared_secret, current_pin)?;
         let pin_auth = create_pin_auth_for_change_pin(
             &shared_secret,
             &new_pin_encrypted,
@@ -114,7 +116,7 @@ impl FidoKeyHid {
 
         let send_payload = client_pin_command::create_payload_change_pin(
             pin_uv_auth_protocol,
-            &shared_secret.public_key,
+            &shared_secret.get_public_key(),
             &pin_auth,
             &new_pin_encrypted,
             &current_pin_hash_encrypted,
@@ -131,12 +133,13 @@ impl FidoKeyHid {
         let authenticator_key_agreement =
             self.get_authenticator_key_agreement(&cid, pin_uv_auth_protocol)?;
 
-        let shared_secret = SharedSecret::new(&authenticator_key_agreement)?;
-        let pin_encrypted = shared_secret.encrypt_pin(pin)?;
+        let shared_secret =
+            SharedSecret::create(pin_uv_auth_protocol, &authenticator_key_agreement)?;
+        let pin_encrypted = encrypt_pin_hash(&shared_secret, pin)?;
 
         let send_payload = client_pin_command::create_payload_get_pin_token(
             pin_uv_auth_protocol,
-            &shared_secret.public_key,
+            &shared_secret.get_public_key(),
             &pin_encrypted,
         );
 
@@ -145,7 +148,7 @@ impl FidoKeyHid {
         let mut pin_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
 
-        let pin_token_decrypted = shared_secret.decrypt_protocol_1(&mut pin_token_encrypted)?;
+        let pin_token_decrypted = shared_secret.decrypt(&mut pin_token_encrypted)?;
 
         Ok(Token {
             key: pin_token_decrypted,
@@ -165,13 +168,14 @@ impl FidoKeyHid {
 
         let authenticator_key_agreement =
             self.get_authenticator_key_agreement(&cid, pin_uv_auth_protocol)?;
-        let shared_secret = SharedSecret::new(&authenticator_key_agreement)?;
-        let pin_encrypted = shared_secret.encrypt_pin(pin)?;
+        let shared_secret =
+            SharedSecret::create(pin_uv_auth_protocol, &authenticator_key_agreement)?;
+        let pin_encrypted = encrypt_pin_hash(&shared_secret, pin)?;
 
         let send_payload =
             client_pin_command::create_payload_get_pin_uv_auth_token_using_pin_with_permissions(
                 pin_uv_auth_protocol,
-                &shared_secret.public_key,
+                &shared_secret.get_public_key(),
                 &pin_encrypted,
                 Permissions::from_bits_truncate(permissions),
                 rp_id,
@@ -180,7 +184,7 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token_decrypted = shared_secret.decrypt_protocol_1(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
 
         Ok(Token {
             key: auth_token_decrypted,
@@ -199,12 +203,13 @@ impl FidoKeyHid {
 
         let authenticator_key_agreement =
             self.get_authenticator_key_agreement(&cid, pin_uv_auth_protocol)?;
-        let shared_secret = SharedSecret::new(&authenticator_key_agreement)?;
+        let shared_secret =
+            SharedSecret::create(pin_uv_auth_protocol, &authenticator_key_agreement)?;
 
         let send_payload =
             client_pin_command::create_payload_get_pin_uv_auth_token_using_uv_with_permissions(
                 pin_uv_auth_protocol,
-                &shared_secret.public_key,
+                &shared_secret.get_public_key(),
                 Permissions::from_bits_truncate(permissions),
                 rp_id,
             );
@@ -212,7 +217,7 @@ impl FidoKeyHid {
 
         let mut auth_token_encrypted =
             client_pin_response::parse_cbor_client_pin_get_pin_token(&response_cbor)?;
-        let auth_token_decrypted = shared_secret.decrypt_protocol_1(&mut auth_token_encrypted)?;
+        let auth_token_decrypted = shared_secret.decrypt(&mut auth_token_encrypted)?;
 
         Ok(Token {
             key: auth_token_decrypted,
@@ -226,11 +231,7 @@ fn create_pin_auth_for_set_pin(
     shared_secret: &SharedSecret,
     new_pin_enc: &[u8],
 ) -> Result<Vec<u8>> {
-    // HMAC-SHA-256(sharedSecret, newPinEnc)
-    let sig = enc_hmac_sha_256::authenticate(&shared_secret.secret, new_pin_enc);
-
-    // left 16
-    let pin_auth = sig[0..16].to_vec();
+    let pin_auth = shared_secret.authenticate(new_pin_enc)?;
 
     Ok(pin_auth)
 }
@@ -245,11 +246,7 @@ fn create_pin_auth_for_change_pin(
     message.append(&mut new_pin_enc.to_vec());
     message.append(&mut current_pin_hash_enc.to_vec());
 
-    // HMAC-SHA-256(sharedSecret, message)
-    let sig = enc_hmac_sha_256::authenticate(&shared_secret.secret, &message);
-
-    // left 16
-    let pin_auth = sig[0..16].to_vec();
+    let pin_auth = shared_secret.authenticate(&message)?;
 
     Ok(pin_auth)
 }
@@ -257,9 +254,17 @@ fn create_pin_auth_for_change_pin(
 // newPinEnc: AES256-CBC(sharedSecret, IV = 0, newPin)
 fn encrypt_pin(shared_secret: &SharedSecret, pin: &str) -> Result<Vec<u8>> {
     let padded_pin = pad_pin(pin)?;
-    let encrypted_pin = enc_aes256_cbc::encrypt_message(&shared_secret.secret, &padded_pin);
+    let encrypted_pin = shared_secret.encrypt(&padded_pin)?;
 
     Ok(encrypted_pin)
+}
+
+fn encrypt_pin_hash(shared_secret: &SharedSecret, pin: &str) -> Result<Vec<u8>> {
+    let hash = digest::digest(&digest::SHA256, pin.as_bytes());
+    let message = &hash.as_ref()[0..16];
+    let encrypted = shared_secret.encrypt(message)?;
+
+    Ok(encrypted)
 }
 
 fn pad_pin(pin: &str) -> Result<Vec<u8>> {
